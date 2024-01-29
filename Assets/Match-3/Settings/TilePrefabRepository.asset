@@ -12,11 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5a395bf00bbfe84e8896c915a55911a, type: 3}
   m_Name: TilePrefabRepository
   m_EditorClassIdentifier: 
-  tileTypePrefabList:
-  - {fileID: 2481334878071755739, guid: e1c4de0809ea0294ab4155bcc443f229, type: 3}
-  - {fileID: 2481334878071755739, guid: 745a744c97159d64aa60aea994a60203, type: 3}
-  - {fileID: 2481334878071755739, guid: 15ec454f285064c46beb5fa4e750b700, type: 3}
-  - {fileID: 2481334878071755739, guid: 4eddaf75e94e3bf449cf77eef97e79f6, type: 3}
-  - {fileID: 2481334878071755739, guid: e40c137ebea76994f850dde4685d2de6, type: 3}
-  - {fileID: 2481334878071755739, guid: 7cab58765cebc084e96b1dc3749b6ad7, type: 3}
-  - {fileID: 2481334878071755739, guid: 81d8d75e1cca02c4da05902131e6733c, type: 3}
+  _tilePrefabList:
+  - _tileType: 10
+    _prefab: {fileID: 2481334878071755739, guid: 745a744c97159d64aa60aea994a60203, type: 3}
+  - _tileType: 20
+    _prefab: {fileID: 2481334878071755739, guid: 15ec454f285064c46beb5fa4e750b700, type: 3}
+  - _tileType: 30
+    _prefab: {fileID: 2481334878071755739, guid: 4eddaf75e94e3bf449cf77eef97e79f6, type: 3}
+  - _tileType: 40
+    _prefab: {fileID: 2481334878071755739, guid: e40c137ebea76994f850dde4685d2de6, type: 3}
+  - _tileType: 50
+    _prefab: {fileID: 2481334878071755739, guid: 7cab58765cebc084e96b1dc3749b6ad7, type: 3}
+  - _tileType: 60
+    _prefab: {fileID: 2481334878071755739, guid: 81d8d75e1cca02c4da05902131e6733c, type: 3}
+  - _tileType: 70
+    _prefab: {fileID: 2481334878071755739, guid: e1c4de0809ea0294ab4155bcc443f229, type: 3}

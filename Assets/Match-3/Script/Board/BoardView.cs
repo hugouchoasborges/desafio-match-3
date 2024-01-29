@@ -50,10 +50,9 @@ namespace match3.board
 
                     _tileSpots[y][x] = tileSpot;
 
-                    int tileTypeIndex = board[y][x].type;
-                    if (tileTypeIndex > -1)
+                    TileView tilePrefab = tilePrefabRepository.GetTileFromType(board[y][x].type);
+                    if (tilePrefab != null)
                     {
-                        TileView tilePrefab = tilePrefabRepository.tileTypePrefabList[tileTypeIndex];
                         TileView tile = Instantiate(tilePrefab);
                         tileSpot.SetTile(tile);
 
@@ -143,7 +142,7 @@ namespace match3.board
 
                 TileSpotView tileSpot = _tileSpots[position.y][position.x];
 
-                TileView tilePrefab = tilePrefabRepository.tileTypePrefabList[addedTileInfo.type];
+                TileView tilePrefab = tilePrefabRepository.GetTileFromType(addedTileInfo.type);
                 TileView tile = Instantiate(tilePrefab);
                 tileSpot.SetTile(tile);
 

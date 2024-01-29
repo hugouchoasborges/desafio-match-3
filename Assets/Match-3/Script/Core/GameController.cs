@@ -8,14 +8,13 @@ namespace match3.core
     public class GameController
     {
         private List<List<Tile>> _boardTiles;
-        private List<int> _tilesTypes;
+        private List<TileType> _tilesTypes;
         private int _tileCount;
 
         public List<List<Tile>> StartGame(int boardWidth, int boardHeight)
         {
-            // TODO: Convert tileTypes to an ENUM
             // TODO: Maybe receive a list of valid types (enum)
-            _tilesTypes = new List<int> { 0, 1, 2, 3 };
+            _tilesTypes = new List<TileType> { TileType.BLUE, TileType.GREEN, TileType.ORANGE, TileType.PINK };
             _boardTiles = CreateBoard(boardWidth, boardHeight, _tilesTypes);
             return _boardTiles;
         }
@@ -73,7 +72,7 @@ namespace match3.core
                         {
                             matchedPosition.Add(new Vector2Int(x, y));
                             // TODO: Move to CreateTile method
-                            newBoard[y][x] = new Tile { id = -1, type = -1 };
+                            newBoard[y][x] = new Tile { id = -1, type = TileType.NONE };
                         }
                     }
                 }
@@ -91,7 +90,7 @@ namespace match3.core
                         {
                             Tile movedTile = newBoard[j - 1][x];
                             newBoard[j][x] = movedTile;
-                            if (movedTile.type > -1)
+                            if (movedTile.type > TileType.NONE)
                             {
                                 if (movedTiles.ContainsKey(movedTile.id))
                                 {
@@ -114,7 +113,7 @@ namespace match3.core
                         newBoard[0][x] = new Tile
                         {
                             id = -1,
-                            type = -1
+                            type = TileType.NONE
                         };
                     }
                 }
@@ -125,12 +124,12 @@ namespace match3.core
                 {
                     for (int x = newBoard[y].Count - 1; x > -1; x--)
                     {
-                        if (newBoard[y][x].type == -1)
+                        if (newBoard[y][x].type == TileType.NONE)
                         {
-                            int tileType = Random.Range(0, _tilesTypes.Count);
+                            int tileTypeIdx = Random.Range(0, _tilesTypes.Count);
                             Tile tile = newBoard[y][x];
                             tile.id = _tileCount++;
-                            tile.type = _tilesTypes[tileType];
+                            tile.type = _tilesTypes[tileTypeIdx];
                             addedTiles.Add(new AddedTileInfo
                             {
                                 position = new Vector2Int(x, y),
@@ -228,7 +227,7 @@ namespace match3.core
             return newBoard;
         }
 
-        private List<List<Tile>> CreateBoard(int width, int height, List<int> tileTypes)
+        private List<List<Tile>> CreateBoard(int width, int height, List<TileType> tileTypes)
         {
             // Create uninitialized board
             List<List<Tile>> board = new List<List<Tile>>(height);
@@ -239,7 +238,7 @@ namespace match3.core
                 for (int x = 0; x < width; x++)
                 {
                     // TODO: Move to CreateTile method
-                    board[y].Add(new Tile { id = -1, type = -1 });
+                    board[y].Add(new Tile { id = -1, type = TileType.NONE });
                 }
             }
 
@@ -248,7 +247,7 @@ namespace match3.core
             {
                 for (int x = 0; x < width; x++)
                 {
-                    List<int> noMatchTypes = new List<int>(tileTypes.Count);
+                    List<TileType> noMatchTypes = new List<TileType>(tileTypes.Count);
                     for (int i = 0; i < tileTypes.Count; i++)
                     {
                         // All tile types

@@ -6,6 +6,8 @@ using UnityEngine.UI;
 
 public class BoardView : MonoBehaviour
 {
+    // TODO: Move tileSpotPrefab to the TilePrefabRepository
+    // TODO: private naming convention
     [SerializeField] private TileSpotView tileSpotPrefab;
 
     [SerializeField] private TilePrefabRepository tilePrefabRepository;
@@ -16,10 +18,12 @@ public class BoardView : MonoBehaviour
 
     private TileView[][] _tiles;
 
+    // TODO: Set it to private, create an access method and make sure to unset afterwards
     public event Action<int, int> onTileClick;
 
     public void CreateBoard(List<List<Tile>> board)
     {
+        // TODO: cache board[0].Count and board.Count
         boardContainer.constraintCount = board[0].Count;
 
         _tileSpots = new TileSpotView[board.Count][];
@@ -32,7 +36,10 @@ public class BoardView : MonoBehaviour
 
             for (int x = 0; x < board[0].Count; x++)
             {
+
                 TileSpotView tileSpot = Instantiate(tileSpotPrefab);
+
+                // TODO: Move all this into TileSpotView
                 tileSpot.transform.SetParent(boardContainer.transform, false);
                 tileSpot.SetPosition(x, y);
                 tileSpot.onClick += OnTileSpotClick;
@@ -58,6 +65,7 @@ public class BoardView : MonoBehaviour
         {
             for (int x = 0; x < _tiles[y].Length; x++)
             {
+                // TODO: Queue this to a pool
                 Destroy(_tiles[y][x].gameObject);
                 Destroy(_tileSpots[y][x].gameObject);
             }
@@ -85,6 +93,7 @@ public class BoardView : MonoBehaviour
         for (int i = 0; i < matchedPosition.Count; i++)
         {
             Vector2Int position = matchedPosition[i];
+            // TODO: Queue this to a pool
             Destroy(_tiles[position.y][position.x].gameObject);
             _tiles[position.y][position.x] = null;
         }

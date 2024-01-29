@@ -10,6 +10,7 @@ public class TileSpotView : MonoBehaviour
     private int _x;
     private int _y;
 
+    // TODO: Set it to private, create an access method and make sure to unset afterwards
     public event Action<int, int> onClick;
 
     private void Awake()
@@ -30,12 +31,14 @@ public class TileSpotView : MonoBehaviour
 
     public void SetTile(TileView tile)
     {
+        // TODO: Create TileView.SetParent(transform)
         tile.transform.SetParent(transform, false);
         tile.transform.position = transform.position;
     }
 
     public Tween AnimatedSetTile(TileView tile)
     {
+        // TODO: Create TileView.SetParent(transform, bool animated)
         tile.transform.SetParent(transform);
         tile.transform.DOKill();
         return tile.transform.DOMove(transform.position, 0.3f);

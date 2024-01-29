@@ -9,6 +9,8 @@ public class GameController
 
     public List<List<Tile>> StartGame(int boardWidth, int boardHeight)
     {
+        // TODO: Convert tileTypes to an ENUM
+        // TODO: Maybe receive a list of valid types (enum)
         _tilesTypes = new List<int> { 0, 1, 2, 3 };
         _boardTiles = CreateBoard(boardWidth, boardHeight, _tilesTypes);
         return _boardTiles;
@@ -16,12 +18,14 @@ public class GameController
 
     public bool IsValidMovement(int fromX, int fromY, int toX, int toY)
     {
+        // TODO: Change this method to work without deep-copying the entire board
         List<List<Tile>> newBoard = CopyBoard(_boardTiles);
 
         Tile switchedTile = newBoard[fromY][fromX];
         newBoard[fromY][fromX] = newBoard[toY][toX];
         newBoard[toY][toX] = switchedTile;
 
+        // TODO: No need for 2 nested for loops
         for (int y = 0; y < newBoard.Count; y++)
         {
             for (int x = 0; x < newBoard[y].Count; x++)
@@ -64,6 +68,7 @@ public class GameController
                     if (matchedTiles[y][x])
                     {
                         matchedPosition.Add(new Vector2Int(x, y));
+                        // TODO: Move to CreateTile method
                         newBoard[y][x] = new Tile { id = -1, type = -1 };
                     }
                 }
@@ -101,6 +106,7 @@ public class GameController
                         }
                     }
 
+                    // TODO: Move to CreateTile method
                     newBoard[0][x] = new Tile
                     {
                         id = -1,
@@ -141,6 +147,8 @@ public class GameController
 
         _boardTiles = newBoard;
         return boardSequences;
+
+        // TODO: Remove line
         //return _boardTiles;
     }
 
@@ -155,6 +163,8 @@ public class GameController
 
     private static List<List<bool>> FindMatches(List<List<Tile>> newBoard)
     {
+        // TODO: newBoard -> board
+        // This method doesn't need to know this is a new board
         List<List<bool>> matchedTiles = new List<List<bool>>();
         for (int y = 0; y < newBoard.Count; y++)
         {
@@ -191,6 +201,12 @@ public class GameController
         return matchedTiles;
     }
 
+    /// <summary>
+    /// Deep copies an entire board
+    /// TODO: Move this to the new Board class
+    /// </summary>
+    /// <param name="boardToCopy"></param>
+    /// <returns></returns>
     private static List<List<Tile>> CopyBoard(List<List<Tile>> boardToCopy)
     {
         List<List<Tile>> newBoard = new List<List<Tile>>(boardToCopy.Count);
@@ -200,6 +216,7 @@ public class GameController
             for (int x = 0; x < boardToCopy[y].Count; x++)
             {
                 Tile tile = boardToCopy[y][x];
+                // TODO: Move to CreateTile method
                 newBoard[y].Add(new Tile { id = tile.id, type = tile.type });
             }
         }
@@ -209,6 +226,7 @@ public class GameController
 
     private List<List<Tile>> CreateBoard(int width, int height, List<int> tileTypes)
     {
+        // Create uninitialized board
         List<List<Tile>> board = new List<List<Tile>>(height);
         _tileCount = 0;
         for (int y = 0; y < height; y++)
@@ -216,10 +234,12 @@ public class GameController
             board.Add(new List<Tile>(width));
             for (int x = 0; x < width; x++)
             {
+                // TODO: Move to CreateTile method
                 board[y].Add(new Tile { id = -1, type = -1 });
             }
         }
 
+        // Now fill the board with only no-matching tiles
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++)
@@ -227,9 +247,12 @@ public class GameController
                 List<int> noMatchTypes = new List<int>(tileTypes.Count);
                 for (int i = 0; i < tileTypes.Count; i++)
                 {
+                    // All tile types
                     noMatchTypes.Add(_tilesTypes[i]);
                 }
 
+                // If the previous two tiles are already matching,
+                // the current one can't be of the same type -- Vertically and Horizontally
                 if (x > 1
                     && board[y][x - 1].type == board[y][x - 2].type)
                 {

@@ -3,12 +3,14 @@ using UnityEngine;
 
 public class BoardSequence
 {
+    // TODO: All of this should be private with accessors
     public List<Vector2Int> matchedPosition;
     public List<AddedTileInfo> addedTiles;
     public List<MovedTileInfo> movedTiles;
 
     public override string ToString()
     {
+        // TODO: StringBuilder
         string log;
         log = "matchedPosition: \n";
         for (int i = 0; i < matchedPosition.Count; i++)

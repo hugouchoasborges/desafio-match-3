@@ -9,83 +9,78 @@ namespace match3.core
 {
     public class GameHandler : MonoBehaviour
     {
-        // TODO: Should it be serialized?
-        // TODO: [Header("Components")]
-        // TODO: private naming convention
-        [SerializeField] private GameController gameController;
-
-        // TODO: [Header("Board Settings")] [Range(min, max)]
-        [SerializeField] public int boardWidth = 10;
-
-        [SerializeField] public int boardHeight = 10;
-
+        [Header("Components")]
+        [SerializeField] private GameController _gameController;
         [SerializeField] public BoardView boardView;
+
+        [Header("Board Settings")]
+        [SerializeField] private TileType[] _availableTileTypes;
+        [SerializeField][Range(2, 20)] private int _boardWidth = 10;
+        [SerializeField][Range(2, 20)] private int _boardHeight = 10;
+
+        // Internal animation\movement control
+        private int _selectedX, _selectedY = -1;
+        private bool _isAnimating;
+
 
         private void Awake()
         {
-            // TODO: Move instantiation to Start -- Use awake only for Get\Add Component operations
-            gameController = new GameController();
-
             // TODO: Remove this event dependency, maybe create something like a FSM event dispatch?
             boardView.onTileClick += OnTileClick;
         }
 
         private void Start()
         {
+            _gameController = new GameController();
+
             // TODO: Maybe create a Board class to that holds List<List<Tile>> ??? 
-            List<List<Tile>> board = gameController.StartGame(boardWidth, boardHeight);
+            List<List<Tile>> board = _gameController.StartGame(_availableTileTypes, _boardWidth, _boardHeight);
             boardView.CreateBoard(board);
         }
 
-        // TODO: Move to the top
-        // TODO: private naming convention
-        private int selectedX, selectedY = -1;
-
-        private bool isAnimating;
-
         private void OnTileClick(int x, int y)
         {
-            if (isAnimating) return;
+            if (_isAnimating) return;
 
-            if (selectedX > -1 && selectedY > -1)
+            if (_selectedX > -1 && _selectedY > -1)
             {
-                if (Mathf.Abs(selectedX - x) + Mathf.Abs(selectedY - y) > 1)
+                if (Mathf.Abs(_selectedX - x) + Mathf.Abs(_selectedY - y) > 1)
                 {
                     // TODO: Enter here also if the same slot was selected
-                    selectedX = -1;
-                    selectedY = -1;
+                    _selectedX = -1;
+                    _selectedY = -1;
                 }
                 else
                 {
-                    isAnimating = true;
-                    boardView.SwapTiles(selectedX, selectedY, x, y).onComplete += () =>
+                    _isAnimating = true;
+                    boardView.SwapTiles(_selectedX, _selectedY, x, y).onComplete += () =>
                     {
                         // TODO: This code is creating a deep copy of the entire board just to check if the movement was valid
                         // Change it to check valid movements BEFORE them were made, not deep copying the entire board
-                        bool isValid = gameController.IsValidMovement(selectedX, selectedY, x, y);
+                        bool isValid = _gameController.IsValidMovement(_selectedX, _selectedY, x, y);
                         if (!isValid)
                         {
-                            boardView.SwapTiles(x, y, selectedX, selectedY)
-                            .onComplete += () => isAnimating = false;
+                            boardView.SwapTiles(x, y, _selectedX, _selectedY)
+                            .onComplete += () => _isAnimating = false;
                         }
                         else
                         {
                             // Finish swaping the tiles (control layer)
-                            List<BoardSequence> swapResult = gameController.SwapTile(selectedX, selectedY, x, y);
+                            List<BoardSequence> swapResult = _gameController.SwapTile(_selectedX, _selectedY, x, y);
 
                             // Then animate the new updated board 
-                            AnimateBoard(swapResult, 0, () => isAnimating = false);
+                            AnimateBoard(swapResult, 0, () => _isAnimating = false);
                         }
 
-                        selectedX = -1;
-                        selectedY = -1;
+                        _selectedX = -1;
+                        _selectedY = -1;
                     };
                 }
             }
             else
             {
-                selectedX = x;
-                selectedY = y;
+                _selectedX = x;
+                _selectedY = y;
             }
         }
 

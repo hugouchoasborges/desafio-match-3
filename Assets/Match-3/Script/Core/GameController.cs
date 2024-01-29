@@ -11,10 +11,13 @@ namespace match3.core
         private List<TileType> _tilesTypes;
         private int _tileCount;
 
-        public List<List<Tile>> StartGame(int boardWidth, int boardHeight)
+        public List<List<Tile>> StartGame(TileType[] _availableTileTypes, int boardWidth, int boardHeight)
         {
-            // TODO: Maybe receive a list of valid types (enum)
-            _tilesTypes = new List<TileType> { TileType.BLUE, TileType.GREEN, TileType.ORANGE, TileType.PINK };
+            _tilesTypes = new List<TileType>();
+            foreach (var newTileType in _availableTileTypes)
+                if (newTileType != TileType.NONE && !_tilesTypes.Contains(newTileType)) // Shouldn't allow duplicates
+                    _tilesTypes.Add(newTileType);
+
             _boardTiles = CreateBoard(boardWidth, boardHeight, _tilesTypes);
             return _boardTiles;
         }

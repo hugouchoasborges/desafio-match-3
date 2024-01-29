@@ -1,7 +1,11 @@
-﻿using UnityEngine;
+﻿using match3.tile;
+using UnityEngine;
 
-[CreateAssetMenu(fileName = "TilePrefabRepository", menuName = "Gameplay/TilePrefabRepository")]
-public class TilePrefabRepository : ScriptableObject
+namespace match3.settings
 {
-    public TileView[] tileTypePrefabList;
+    [CreateAssetMenu(fileName = "TilePrefabRepository", menuName = "Gameplay/TilePrefabRepository")]
+    public class TilePrefabRepository : ScriptableObject
+    {
+        public TileView[] tileTypePrefabList;
+    }
 }

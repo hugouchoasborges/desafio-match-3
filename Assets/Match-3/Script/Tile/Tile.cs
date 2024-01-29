@@ -1,6 +1,9 @@
-﻿public class Tile
+﻿namespace match3.tile
 {
-    public int id;
-    // TODO: Convert to enum
-    public int type;
+    public class Tile
+    {
+        public int id;
+        // TODO: Convert to enum
+        public int type;
+    }
 }

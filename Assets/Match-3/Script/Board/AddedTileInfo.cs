@@ -1,7 +1,10 @@
 ﻿using UnityEngine;
 
-public struct AddedTileInfo
+namespace match3.board
 {
-    public Vector2Int position;
-    public int type;
+    public struct AddedTileInfo
+    {
+        public Vector2Int position;
+        public int type;
+    }
 }

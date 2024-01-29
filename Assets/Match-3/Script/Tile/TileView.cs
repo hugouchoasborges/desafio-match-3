@@ -2,6 +2,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TileView : MonoBehaviour
+namespace match3.tile
 {
+    public class TileView : MonoBehaviour
+    {
+    }
 }

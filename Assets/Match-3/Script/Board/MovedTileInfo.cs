@@ -1,7 +1,10 @@
 ﻿using UnityEngine;
 
-public class MovedTileInfo
+namespace match3.board
 {
-    public Vector2Int from;
-    public Vector2Int to;
+    public class MovedTileInfo
+    {
+        public Vector2Int from;
+        public Vector2Int to;
+    }
 }

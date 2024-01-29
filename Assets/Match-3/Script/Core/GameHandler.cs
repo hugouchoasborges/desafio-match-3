@@ -22,20 +22,13 @@ namespace match3.core
         private int _selectedX, _selectedY = -1;
         private bool _isAnimating;
 
-
-        private void Awake()
-        {
-            // TODO: Remove this event dependency, maybe create something like a FSM event dispatch?
-            boardView.onTileClick += OnTileClick;
-        }
-
         private void Start()
         {
             _gameController = new GameController();
 
             // TODO: Maybe create a Board class to that holds List<List<Tile>> ??? 
             List<List<Tile>> board = _gameController.StartGame(_availableTileTypes, _boardWidth, _boardHeight);
-            boardView.CreateBoard(board);
+            boardView.CreateBoard(board, OnTileClick);
         }
 
         private void OnTileClick(int x, int y)
@@ -44,9 +37,8 @@ namespace match3.core
 
             if (_selectedX > -1 && _selectedY > -1)
             {
-                if (Mathf.Abs(_selectedX - x) + Mathf.Abs(_selectedY - y) > 1)
+                if (Mathf.Abs(_selectedX - x) + Mathf.Abs(_selectedY - y) != 1)
                 {
-                    // TODO: Enter here also if the same slot was selected
                     _selectedX = -1;
                     _selectedY = -1;
                 }

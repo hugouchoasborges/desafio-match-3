@@ -9,41 +9,66 @@ namespace match3.tile
     {
         [SerializeField] private Button _button;
 
+        // Position
         private int _x;
         private int _y;
 
-        // TODO: Set it to private, create an access method and make sure to unset afterwards
-        public event Action<int, int> onClick;
+        // Callback
+        private Action<int, int> _onClickCallback;
 
-        private void Awake()
+        public void Initialize(Transform parentTransform, int positionX, int positionY, Action<int, int> OnClick, bool worldPositionStays = false)
         {
-            _button.onClick.AddListener(OnTileClick);
-        }
-
-        private void OnTileClick()
-        {
-            onClick?.Invoke(_x, _y);
-        }
-
-        public void SetPosition(int x, int y)
-        {
-            _x = x;
-            _y = y;
+            transform.SetParent(parentTransform, worldPositionStays);
+            _x = positionX;
+            _y = positionY;
+            _onClickCallback = OnClick;
         }
 
         public void SetTile(TileView tile)
         {
-            // TODO: Create TileView.SetParent(transform)
-            tile.transform.SetParent(transform, false);
-            tile.transform.position = transform.position;
+            tile.SetParent(transform, false);
+            tile.SetPosition(transform.position);
         }
+
+        /// <summary>
+        /// Sets the tile to the corresponding one with a movement animation
+        /// </summary>
+        /// <param name="tile"></param>
+        /// <returns>The DG.Tweening.Tween created from this operation</returns>
 
         public Tween AnimatedSetTile(TileView tile)
         {
-            // TODO: Create TileView.SetParent(transform, bool animated)
-            tile.transform.SetParent(transform);
-            tile.transform.DOKill();
-            return tile.transform.DOMove(transform.position, 0.3f);
+            tile.SetParent(transform);
+            return tile.DOMove(transform.position, 0.3f);
+        }
+
+        // ========================== Button Events ============================
+
+        private void OnTileClick()
+        {
+            _onClickCallback?.Invoke(_x, _y);
+        }
+
+        private void OnEnable() => AddButtonsListeners();
+
+        private void OnDisable() => RemoveButtonsListeners();
+
+        private void AddButtonsListeners()
+        {
+            _button.onClick.AddListener(OnTileClick);
+        }
+
+        private void RemoveButtonsListeners()
+        {
+            _button.onClick.RemoveAllListeners();
+        }
+
+        // ========================== Dispose ============================
+
+        private void OnDestroy()
+        {
+            _onClickCallback = null;
+            RemoveButtonsListeners();
         }
 
     }

@@ -6,8 +6,10 @@ namespace match3.settings
     [CreateAssetMenu(fileName = "TilePrefabRepository", menuName = "Gameplay/TilePrefabRepository")]
     public class TilePrefabRepository : ScriptableObject
     {
-        [SerializeField]
-        private TilePrefabItem[] _tilePrefabList;
+        [SerializeField] private TileSpotView _tileSpotPrefab;
+        [SerializeField] private TilePrefabItem[] _tilePrefabList;
+
+        public TileSpotView TileSpotPrefab => _tileSpotPrefab;
 
         public TileView GetTileFromType(TileType tileType)
         {

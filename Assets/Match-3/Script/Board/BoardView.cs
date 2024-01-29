@@ -10,47 +10,52 @@ namespace match3.board
 {
     public class BoardView : MonoBehaviour
     {
-        // TODO: Move tileSpotPrefab to the TilePrefabRepository
-        // TODO: private naming convention
-        [SerializeField] private TileSpotView tileSpotPrefab;
-
-        [SerializeField] private TilePrefabRepository tilePrefabRepository;
-
-        [SerializeField] private GridLayoutGroup boardContainer;
+        [Header("Components")]
+        [SerializeField] private TilePrefabRepository _tilePrefabRepository;
+        [SerializeField] private GridLayoutGroup _boardContainer;
 
         private TileSpotView[][] _tileSpots;
-
         private TileView[][] _tiles;
 
-        // TODO: Set it to private, create an access method and make sure to unset afterwards
-        public event Action<int, int> onTileClick;
+        private Action<int, int> _onTileClickCallback;
 
-        public void CreateBoard(List<List<Tile>> board)
+        private void OnTileSpotClick(int x, int y)
         {
-            // TODO: cache board[0].Count and board.Count
-            boardContainer.constraintCount = board[0].Count;
+            _onTileClickCallback?.Invoke(x, y);
+        }
 
-            _tileSpots = new TileSpotView[board.Count][];
-            _tiles = new TileView[board.Count][];
+        // ----------------------------------------------------------------------------------
+        // ========================== Board Operations ============================
+        // ----------------------------------------------------------------------------------
 
-            for (int y = 0; y < board.Count; y++)
+        // ========================== Create ============================
+
+        public void CreateBoard(List<List<Tile>> board, Action<int, int> onClick)
+        {
+            _onTileClickCallback = onClick;
+
+            int lines = board.Count;
+            int columns = board[0].Count;
+
+            _boardContainer.constraintCount = columns;
+
+            _tileSpots = new TileSpotView[lines][];
+            _tiles = new TileView[lines][];
+
+            for (int y = 0; y < lines; y++)
             {
-                _tileSpots[y] = new TileSpotView[board[0].Count];
-                _tiles[y] = new TileView[board[0].Count];
+                _tileSpots[y] = new TileSpotView[columns];
+                _tiles[y] = new TileView[columns];
 
-                for (int x = 0; x < board[0].Count; x++)
+                for (int x = 0; x < columns; x++)
                 {
 
-                    TileSpotView tileSpot = Instantiate(tileSpotPrefab);
+                    TileSpotView tileSpot = Instantiate(_tilePrefabRepository.TileSpotPrefab);
 
-                    // TODO: Move all this into TileSpotView
-                    tileSpot.transform.SetParent(boardContainer.transform, false);
-                    tileSpot.SetPosition(x, y);
-                    tileSpot.onClick += OnTileSpotClick;
-
+                    tileSpot.Initialize(_boardContainer.transform, x, y, OnTileSpotClick);
                     _tileSpots[y][x] = tileSpot;
 
-                    TileView tilePrefab = tilePrefabRepository.GetTileFromType(board[y][x].type);
+                    TileView tilePrefab = _tilePrefabRepository.GetTileFromType(board[y][x].type);
                     if (tilePrefab != null)
                     {
                         TileView tile = Instantiate(tilePrefab);
@@ -61,6 +66,9 @@ namespace match3.board
                 }
             }
         }
+
+
+        // ========================== Destroy ============================
 
         public void DestroyBoard()
         {
@@ -78,6 +86,14 @@ namespace match3.board
             _tiles = null;
         }
 
+
+        // ----------------------------------------------------------------------------------
+        // ========================== Tiles Operations ============================
+        // ----------------------------------------------------------------------------------
+
+
+        // ========================== Swap ============================
+
         public Tween SwapTiles(int fromX, int fromY, int toX, int toY)
         {
             Sequence swapSequence = DOTween.Sequence();
@@ -91,6 +107,8 @@ namespace match3.board
             return swapSequence;
         }
 
+        // ========================== Destroy ============================
+
         public Tween DestroyTiles(List<Vector2Int> matchedPosition)
         {
             for (int i = 0; i < matchedPosition.Count; i++)
@@ -102,6 +120,8 @@ namespace match3.board
             }
             return DOVirtual.DelayedCall(0.2f, () => { });
         }
+
+        // ========================== Move ============================
 
         public Tween MoveTiles(List<MovedTileInfo> movedTiles)
         {
@@ -132,6 +152,8 @@ namespace match3.board
             return sequence;
         }
 
+        // ========================== Create ============================
+
         public Tween CreateTile(List<AddedTileInfo> addedTiles)
         {
             Sequence seq = DOTween.Sequence();
@@ -142,7 +164,7 @@ namespace match3.board
 
                 TileSpotView tileSpot = _tileSpots[position.y][position.x];
 
-                TileView tilePrefab = tilePrefabRepository.GetTileFromType(addedTileInfo.type);
+                TileView tilePrefab = _tilePrefabRepository.GetTileFromType(addedTileInfo.type);
                 TileView tile = Instantiate(tilePrefab);
                 tileSpot.SetTile(tile);
 
@@ -155,9 +177,11 @@ namespace match3.board
             return seq;
         }
 
-        private void OnTileSpotClick(int x, int y)
+        // ========================== Dispose ============================
+
+        private void OnDestroy()
         {
-            onTileClick(x, y);
+            _onTileClickCallback = null;
         }
     }
 }

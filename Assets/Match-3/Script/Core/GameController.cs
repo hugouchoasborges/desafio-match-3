@@ -74,8 +74,7 @@ namespace match3.core
                         if (matchedTiles[y][x])
                         {
                             matchedPosition.Add(new Vector2Int(x, y));
-                            // TODO: Move to CreateTile method
-                            newBoard[y][x] = new Tile { id = -1, type = TileType.NONE };
+                            newBoard[y][x] = new Tile();
                         }
                     }
                 }
@@ -112,12 +111,7 @@ namespace match3.core
                             }
                         }
 
-                        // TODO: Move to CreateTile method
-                        newBoard[0][x] = new Tile
-                        {
-                            id = -1,
-                            type = TileType.NONE
-                        };
+                        newBoard[0][x] = new Tile();
                     }
                 }
 
@@ -131,8 +125,8 @@ namespace match3.core
                         {
                             int tileTypeIdx = Random.Range(0, _tilesTypes.Count);
                             Tile tile = newBoard[y][x];
-                            tile.id = _tileCount++;
-                            tile.type = _tilesTypes[tileTypeIdx];
+                            tile.SetID(_tileCount++);
+                            tile.SetType(_tilesTypes[tileTypeIdx]);
                             addedTiles.Add(new AddedTileInfo
                             {
                                 position = new Vector2Int(x, y),
@@ -142,12 +136,11 @@ namespace match3.core
                     }
                 }
 
-                BoardSequence sequence = new BoardSequence
-                {
-                    matchedPosition = matchedPosition,
-                    movedTiles = movedTilesList,
-                    addedTiles = addedTiles
-                };
+                BoardSequence sequence = new BoardSequence(
+                    matchedPosition,
+                    addedTiles,
+                    movedTilesList
+                    );
                 boardSequences.Add(sequence);
             }
 
@@ -222,8 +215,7 @@ namespace match3.core
                 for (int x = 0; x < boardToCopy[y].Count; x++)
                 {
                     Tile tile = boardToCopy[y][x];
-                    // TODO: Move to CreateTile method
-                    newBoard[y].Add(new Tile { id = tile.id, type = tile.type });
+                    newBoard[y].Add(new Tile(id: tile.id, type: tile.type));
                 }
             }
 
@@ -240,8 +232,7 @@ namespace match3.core
                 board.Add(new List<Tile>(width));
                 for (int x = 0; x < width; x++)
                 {
-                    // TODO: Move to CreateTile method
-                    board[y].Add(new Tile { id = -1, type = TileType.NONE });
+                    board[y].Add(new Tile(id: -1, type: TileType.NONE));
                 }
             }
 
@@ -270,8 +261,8 @@ namespace match3.core
                         noMatchTypes.Remove(board[y - 1][x].type);
                     }
 
-                    board[y][x].id = _tileCount++;
-                    board[y][x].type = noMatchTypes[Random.Range(0, noMatchTypes.Count)];
+                    board[y][x].SetID(_tileCount++);
+                    board[y][x].SetType(noMatchTypes[Random.Range(0, noMatchTypes.Count)]);
                 }
             }
 

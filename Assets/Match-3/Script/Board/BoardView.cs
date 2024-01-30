@@ -30,12 +30,12 @@ namespace match3.board
 
         // ========================== Create ============================
 
-        public void CreateBoard(List<List<Tile>> board, Action<int, int> onClick)
+        public void CreateBoard(Board board, Action<int, int> onClick)
         {
             _onTileClickCallback = onClick;
 
-            int lines = board.Count;
-            int columns = board[0].Count;
+            int lines = board.lines;
+            int columns = board.columns;
 
             _boardContainer.constraintCount = columns;
 

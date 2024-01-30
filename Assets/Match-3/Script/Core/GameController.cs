@@ -7,34 +7,33 @@ namespace match3.core
 {
     public class GameController
     {
-        private List<List<Tile>> _boardTiles;
+        private Board _board;
         private List<TileType> _tilesTypes;
         private int _tileCount;
 
-        public List<List<Tile>> StartGame(TileType[] _availableTileTypes, int boardWidth, int boardHeight)
+        public Board StartGame(TileType[] _availableTileTypes, int boardWidth, int boardHeight)
         {
             _tilesTypes = new List<TileType>();
             foreach (var newTileType in _availableTileTypes)
                 if (newTileType != TileType.NONE && !_tilesTypes.Contains(newTileType)) // Shouldn't allow duplicates
                     _tilesTypes.Add(newTileType);
 
-            _boardTiles = CreateBoard(boardWidth, boardHeight, _tilesTypes);
-            return _boardTiles;
+            _board = CreateBoard(boardWidth, boardHeight, _tilesTypes);
+            return _board;
         }
 
         public bool IsValidMovement(int fromX, int fromY, int toX, int toY)
         {
             // TODO: Change this method to work without deep-copying the entire board
-            List<List<Tile>> newBoard = CopyBoard(_boardTiles);
+            Board newBoard = _board.Clone();
 
             Tile switchedTile = newBoard[fromY][fromX];
             newBoard[fromY][fromX] = newBoard[toY][toX];
             newBoard[toY][toX] = switchedTile;
 
-            // TODO: No need for 2 nested for loops
-            for (int y = 0; y < newBoard.Count; y++)
+            for (int y = 0; y < newBoard.lines; y++)
             {
-                for (int x = 0; x < newBoard[y].Count; x++)
+                for (int x = 0; x < newBoard.columns; x++)
                 {
                     if (x > 1
                         && newBoard[y][x].type == newBoard[y][x - 1].type
@@ -55,7 +54,7 @@ namespace match3.core
 
         public List<BoardSequence> SwapTile(int fromX, int fromY, int toX, int toY)
         {
-            List<List<Tile>> newBoard = CopyBoard(_boardTiles);
+            Board newBoard = _board.Clone();
 
             Tile switchedTile = newBoard[fromY][fromX];
             newBoard[fromY][fromX] = newBoard[toY][toX];
@@ -67,9 +66,9 @@ namespace match3.core
             {
                 //Cleaning the matched tiles
                 List<Vector2Int> matchedPosition = new List<Vector2Int>();
-                for (int y = 0; y < newBoard.Count; y++)
+                for (int y = 0; y < newBoard.lines; y++)
                 {
-                    for (int x = 0; x < newBoard[y].Count; x++)
+                    for (int x = 0; x < newBoard.columns; x++)
                     {
                         if (matchedTiles[y][x])
                         {
@@ -117,9 +116,9 @@ namespace match3.core
 
                 // Filling the board
                 List<AddedTileInfo> addedTiles = new List<AddedTileInfo>();
-                for (int y = newBoard.Count - 1; y > -1; y--)
+                for (int y = newBoard.lines - 1; y > -1; y--)
                 {
-                    for (int x = newBoard[y].Count - 1; x > -1; x--)
+                    for (int x = newBoard.columns - 1; x > -1; x--)
                     {
                         if (newBoard[y][x].type == TileType.NONE)
                         {
@@ -144,7 +143,7 @@ namespace match3.core
                 boardSequences.Add(sequence);
             }
 
-            _boardTiles = newBoard;
+            _board = newBoard;
             return boardSequences;
         }
 
@@ -157,21 +156,21 @@ namespace match3.core
             return false;
         }
 
-        private static List<List<bool>> FindMatches(List<List<Tile>> board)
+        private static List<List<bool>> FindMatches(Board board)
         {
             List<List<bool>> matchedTiles = new List<List<bool>>();
-            for (int y = 0; y < board.Count; y++)
+            for (int y = 0; y < board.lines; y++)
             {
-                matchedTiles.Add(new List<bool>(board[y].Count));
-                for (int x = 0; x < board.Count; x++)
+                matchedTiles.Add(new List<bool>(board.columns));
+                for (int x = 0; x < board.columns; x++)
                 {
                     matchedTiles[y].Add(false);
                 }
             }
 
-            for (int y = 0; y < board.Count; y++)
+            for (int y = 0; y < board.lines; y++)
             {
-                for (int x = 0; x < board[y].Count; x++)
+                for (int x = 0; x < board.columns; x++)
                 {
                     if (x > 1
                         && board[y][x].type == board[y][x - 1].type
@@ -195,41 +194,10 @@ namespace match3.core
             return matchedTiles;
         }
 
-        /// <summary>
-        /// Deep copies an entire board
-        /// TODO: Move this to the new Board class
-        /// </summary>
-        /// <param name="boardToCopy"></param>
-        /// <returns></returns>
-        private static List<List<Tile>> CopyBoard(List<List<Tile>> boardToCopy)
-        {
-            List<List<Tile>> newBoard = new List<List<Tile>>(boardToCopy.Count);
-            for (int y = 0; y < boardToCopy.Count; y++)
-            {
-                newBoard.Add(new List<Tile>(boardToCopy[y].Count));
-                for (int x = 0; x < boardToCopy[y].Count; x++)
-                {
-                    Tile tile = boardToCopy[y][x];
-                    newBoard[y].Add(new Tile(id: tile.id, type: tile.type));
-                }
-            }
-
-            return newBoard;
-        }
-
-        private List<List<Tile>> CreateBoard(int width, int height, List<TileType> tileTypes)
+        private Board CreateBoard(int width, int height, List<TileType> tileTypes)
         {
             // Create uninitialized board
-            List<List<Tile>> board = new List<List<Tile>>(height);
-            _tileCount = 0;
-            for (int y = 0; y < height; y++)
-            {
-                board.Add(new List<Tile>(width));
-                for (int x = 0; x < width; x++)
-                {
-                    board[y].Add(new Tile(id: -1, type: TileType.NONE));
-                }
-            }
+            Board board = new Board(width, height);
 
             // Now fill the board with only no-matching tiles
             for (int y = 0; y < height; y++)

@@ -26,8 +26,7 @@ namespace match3.core
         {
             _gameController = new GameController();
 
-            // TODO: Maybe create a Board class to that holds List<List<Tile>> ??? 
-            List<List<Tile>> board = _gameController.StartGame(_availableTileTypes, _boardWidth, _boardHeight);
+            Board board = _gameController.StartGame(_availableTileTypes, _boardWidth, _boardHeight);
             boardView.CreateBoard(board, OnTileClick);
         }
 

@@ -146,9 +146,6 @@ namespace match3.core
 
             _boardTiles = newBoard;
             return boardSequences;
-
-            // TODO: Remove line
-            //return _boardTiles;
         }
 
         private static bool HasMatch(List<List<bool>> list)
@@ -160,35 +157,33 @@ namespace match3.core
             return false;
         }
 
-        private static List<List<bool>> FindMatches(List<List<Tile>> newBoard)
+        private static List<List<bool>> FindMatches(List<List<Tile>> board)
         {
-            // TODO: newBoard -> board
-            // This method doesn't need to know this is a new board
             List<List<bool>> matchedTiles = new List<List<bool>>();
-            for (int y = 0; y < newBoard.Count; y++)
+            for (int y = 0; y < board.Count; y++)
             {
-                matchedTiles.Add(new List<bool>(newBoard[y].Count));
-                for (int x = 0; x < newBoard.Count; x++)
+                matchedTiles.Add(new List<bool>(board[y].Count));
+                for (int x = 0; x < board.Count; x++)
                 {
                     matchedTiles[y].Add(false);
                 }
             }
 
-            for (int y = 0; y < newBoard.Count; y++)
+            for (int y = 0; y < board.Count; y++)
             {
-                for (int x = 0; x < newBoard[y].Count; x++)
+                for (int x = 0; x < board[y].Count; x++)
                 {
                     if (x > 1
-                        && newBoard[y][x].type == newBoard[y][x - 1].type
-                        && newBoard[y][x - 1].type == newBoard[y][x - 2].type)
+                        && board[y][x].type == board[y][x - 1].type
+                        && board[y][x - 1].type == board[y][x - 2].type)
                     {
                         matchedTiles[y][x] = true;
                         matchedTiles[y][x - 1] = true;
                         matchedTiles[y][x - 2] = true;
                     }
                     if (y > 1
-                        && newBoard[y][x].type == newBoard[y - 1][x].type
-                        && newBoard[y - 1][x].type == newBoard[y - 2][x].type)
+                        && board[y][x].type == board[y - 1][x].type
+                        && board[y - 1][x].type == board[y - 2][x].type)
                     {
                         matchedTiles[y][x] = true;
                         matchedTiles[y - 1][x] = true;

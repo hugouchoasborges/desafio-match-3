@@ -61,7 +61,7 @@ namespace match3.core
                             List<BoardSequence> swapResult = _gameController.SwapTile(_selectedX, _selectedY, x, y);
 
                             // Then animate the new updated board 
-                            AnimateBoard(swapResult, 0, () => _isAnimating = false);
+                            AnimateBoardSequences(swapResult, () => _isAnimating = false);
                         }
 
                         _selectedX = -1;
@@ -76,26 +76,33 @@ namespace match3.core
             }
         }
 
-        private void AnimateBoard(List<BoardSequence> boardSequences, int i, Action onComplete)
+        private void AnimateBoardSequences(List<BoardSequence> boardSequences, Action onComplete)
         {
-            // TODO: Remove this 'int i' parameter
-            // Outside methods shouldn't have to help this method
+            if (boardSequences.Count == 0) return;
+
+            // Retrieve the current sequence and remove it from the list
+            BoardSequence currentBoardSequence = boardSequences[0];
+            boardSequences.Remove(currentBoardSequence);
+
+            // Create an animation sequence
+            Sequence sequence = CreateBoardAnimationSequence(currentBoardSequence);
+
+            // Link it to the next animation sequence OR to the onComplete callback
+            if (boardSequences.Count > 0)
+                sequence.onComplete += () => AnimateBoardSequences(boardSequences, onComplete);
+            else
+                sequence.onComplete += () => onComplete();
+        }
+
+        private Sequence CreateBoardAnimationSequence(BoardSequence boardSequence)
+        {
             Sequence sequence = DOTween.Sequence();
 
-            BoardSequence boardSequence = boardSequences[i];
             sequence.Append(boardView.DestroyTiles(boardSequence.matchedPosition));
             sequence.Append(boardView.MoveTiles(boardSequence.movedTiles));
             sequence.Append(boardView.CreateTile(boardSequence.addedTiles));
 
-            i++;
-            if (i < boardSequences.Count)
-            {
-                sequence.onComplete += () => AnimateBoard(boardSequences, i, onComplete);
-            }
-            else
-            {
-                sequence.onComplete += () => onComplete();
-            }
+            return sequence;
         }
     }
 }

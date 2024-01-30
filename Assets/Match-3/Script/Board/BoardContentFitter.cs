@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,6 +16,9 @@ namespace match3.board
         [SerializeField]
         private RectTransform _container;
 
+        [SerializeField]
+        private RectTransform _backgroundContainer;
+
 
         [Header("Size Settigns")]
         [SerializeField] private Vector2 _defaultCellSize = Vector2.one * 50;
@@ -27,12 +31,24 @@ namespace match3.board
         [Range(0, 1)]
         private float _axisSizePerc = 1f;
 
+        private Transform _topLeftChild;
+
         void Start()
         {
             // Update current cellSize
             _defaultCellSize = _layout.cellSize;
 
             UpdateLayout();
+        }
+
+        private void OnEnable()
+        {
+            _backgroundContainer.gameObject.SetActive(true);
+        }
+
+        private void OnDisable()
+        {
+            _backgroundContainer.gameObject.SetActive(false);
         }
 
         void OnRectTransformDimensionsChange()
@@ -42,6 +58,12 @@ namespace match3.board
 
         [ContextMenu("Fit to Container")]
         private void UpdateLayout()
+        {
+            StopCoroutine(UpdateLayout_Coroutine());
+            StartCoroutine(UpdateLayout_Coroutine());
+        }
+
+        private IEnumerator UpdateLayout_Coroutine()
         {
             float cellSizeX = _defaultCellSize.x;
             float cellSizeY = _defaultCellSize.y;
@@ -53,6 +75,19 @@ namespace match3.board
             float fitMultiplier = axisSizeMultiplier / _layout.constraintCount;
 
             _layout.cellSize = new Vector2(cellSizeX, cellSizeY) * fitMultiplier * _axisSizePerc;
+
+            // Needed so the Grid Layout can be computed
+            yield return new WaitForEndOfFrame();
+
+            // Background adjustments
+            if(_topLeftChild == null)
+                _topLeftChild = _layout.gameObject.transform.GetChild(1);
+
+            _backgroundContainer.sizeDelta = new Vector2(_layout.minWidth, _layout.minHeight);
+            _backgroundContainer.position = new Vector2(
+                _topLeftChild.position.x - (_layout.cellSize.x / 2),
+                _topLeftChild.position.y + (_layout.cellSize.y / 2)
+                );
         }
 
         [ContextMenu("Reset Fit")]

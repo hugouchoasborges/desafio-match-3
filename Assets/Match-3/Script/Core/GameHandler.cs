@@ -97,10 +97,10 @@ namespace match3.core
                     _progressView.SetScore(currentBoardSequence.score);
                 };
             else
-                sequence.onComplete += () => 
+                sequence.onComplete += () =>
                 {
                     _progressView.UpdateProgress(_gameController.progress);
-                    onComplete(); 
+                    onComplete();
                 };
         }
 

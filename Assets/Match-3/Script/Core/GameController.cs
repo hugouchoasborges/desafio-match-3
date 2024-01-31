@@ -1,8 +1,12 @@
 using match3.board;
 using match3.progress;
+using match3.special;
 using match3.tile;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+
+using Random = UnityEngine.Random;
 
 namespace match3.core
 {
@@ -10,6 +14,12 @@ namespace match3.core
     {
         private Board _board;
         public Progress progress { get; private set; }
+
+        // Specials
+        public Special ClearLinesSpecial { get; private set; }
+        public Special ExplosionSpecial { get; private set; }
+        public Special ColorClearSpecial { get; private set; }
+
         private List<TileType> _tilesTypes;
         private int _tileCount;
 
@@ -21,8 +31,23 @@ namespace match3.core
                     _tilesTypes.Add(newTileType);
 
             _board = CreateBoard(boardWidth, boardHeight, _tilesTypes);
+
+            // Progress
             progress = new Progress();
+
             return _board;
+        }
+
+        public void SetSpecials(
+            int clearLinesDurationSec, int clearLinesWarmupSec,
+            int explosionDurationSec, int explosionWarmupSec,
+            int colorClearDurationSec, int colorClearWarmupSec
+            )
+        {
+            // Specials
+            ClearLinesSpecial = new Special(clearLinesDurationSec, clearLinesWarmupSec);
+            ExplosionSpecial = new Special(explosionDurationSec, explosionWarmupSec);
+            ColorClearSpecial = new Special(colorClearDurationSec, colorClearWarmupSec);
         }
 
         public bool IsValidMovement(int fromX, int fromY, int toX, int toY)
@@ -81,6 +106,9 @@ namespace match3.core
                         }
                     }
                 }
+
+                if (ClearLinesSpecial.active)
+                    SwapTileClearLinesSpecial(newBoard, matchedPosition);
 
                 // Dropping the tiles
                 Dictionary<int, MovedTileInfo> movedTiles = new Dictionary<int, MovedTileInfo>();
@@ -238,5 +266,56 @@ namespace match3.core
 
             return board;
         }
+
+
+
+        // ----------------------------------------------------------------------------------
+        // ========================== Specials ============================
+        // ----------------------------------------------------------------------------------
+
+        // ========================== Clear Lines============================
+
+        public void SetSpecialClearLinesActive(bool active)
+        {
+            ClearLinesSpecial.SetActive(active);
+        }
+
+        private void SwapTileClearLinesSpecial(Board newBoard, List<Vector2Int> matchedPosition)
+        {
+            // If the clear lines special is active, look for matches and 
+            // include the entire row as a valid match
+
+            List<int> linesToClear = new List<int>();
+            foreach (var match in matchedPosition)
+            {
+                if (!linesToClear.Contains(match.y))
+                    linesToClear.Add(match.y);
+            }
+
+            matchedPosition.Clear();
+
+            foreach (int y in linesToClear)
+            {
+                // Mark the entire line as a match
+                for (int x = 0; x < newBoard.columns; x++)
+                {
+                    matchedPosition.Add(new Vector2Int(x, y));
+                    newBoard[y][x] = new Tile();
+                }
+            }
+        }
+
+        public void SetSpecialExplosionActive(bool active)
+        {
+            // TODO
+            throw new NotImplementedException();
+        }
+
+        public void SetSpecialColorClearActive(bool active)
+        {
+            // TODO
+            throw new NotImplementedException();
+        }
+
     }
 }

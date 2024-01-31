@@ -1,5 +1,6 @@
 ﻿using DG.Tweening;
 using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,6 +11,7 @@ namespace match3.special
         [Header("Components")]
         [SerializeField] private Button _button;
         [SerializeField] private Image _image;
+        [SerializeField] private TMP_Text _text;
 
         [Header("Special Settings")]
         [SerializeField][Range(0, 30)] private int _warmupSeconds = 10;
@@ -31,6 +33,12 @@ namespace match3.special
             _button.onClick.RemoveAllListeners();
         }
 
+        public void SetUp(string name, Sprite icon)
+        {
+            _text.text = name;
+            if (icon != null) _image.sprite = icon;
+        }
+
 
         // ========================== Click Listener ============================
 
@@ -44,23 +52,34 @@ namespace match3.special
             // Disable button
             _button.interactable = false;
 
+            // Callback
+            _onClickCallback?.Invoke();
+        }
+
+
+        // ========================== Tween Animations ============================
+
+        public void AnimateButton(float durationSeconds, float warmupSeconds, 
+            Action onEffectFinishedCallback = null,
+            Action onWarmupFinishedCallback = null)
+        {
             KillTweens();
 
             // Activation animation
-            _warmupDelayedCall = AnimateButtonFillAmount(1, 0, _durationSeconds);
+            _warmupDelayedCall = AnimateButtonFillAmount(1, 0, durationSeconds);
             _warmupDelayedCall.onComplete = () =>
             {
 
+                onEffectFinishedCallback?.Invoke();
+
                 // Warmup Animation
-                _durationDelayedCall = AnimateButtonFillAmount(0, 1, _warmupSeconds);
+                _durationDelayedCall = AnimateButtonFillAmount(0, 1, warmupSeconds);
                 _durationDelayedCall.onComplete = () =>
                 {
                     _button.interactable = true;
+                    onWarmupFinishedCallback?.Invoke();
                 };
             };
-
-            // Callback
-            _onClickCallback?.Invoke();
         }
 
         private Tween AnimateButtonFillAmount(float from, float to, float duration)

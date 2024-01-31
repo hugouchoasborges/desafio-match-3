@@ -47,6 +47,45 @@ namespace match3.special
         }
 
 
+        // ========================== Animations ============================
+
+        private void AnimateButton(SpecialButtonView button, Special special,
+            Action onEffectFinishedCallback = null,
+            Action onWarmupFinishedCallback = null)
+        {
+            button.AnimateButton(special.durationSeconds, special.warmupSeconds,
+                onEffectFinishedCallback,
+                onWarmupFinishedCallback
+                );
+        }
+
+        public void AnimateClearLinesButton(Special special,
+            Action onEffectFinishedCallback = null,
+            Action onWarmupFinishedCallback = null)
+            => AnimateButton(_clearLinesButton, special, onEffectFinishedCallback, onWarmupFinishedCallback);
+
+        public void AnimateExplosionButton(Special special,
+            Action onEffectFinishedCallback = null,
+            Action onWarmupFinishedCallback = null)
+            => AnimateButton(_explosionButton, special, onEffectFinishedCallback, onWarmupFinishedCallback);
+
+        public void AnimateColorClearButton(Special special,
+            Action onEffectFinishedCallback = null,
+            Action onWarmupFinishedCallback = null)
+            => AnimateButton(_colorClearButton, special, onEffectFinishedCallback, onWarmupFinishedCallback);
+
+        // ========================== Setters ============================
+
+        private void SetupButton(SpecialButtonView button, string name, Sprite icon)
+        {
+            button.SetUp(name, icon);
+        }
+
+        public void SetupClearLines(string name, Sprite icon) => SetupButton(_clearLinesButton, name, icon);
+        public void SetupExplosion(string name, Sprite icon) => SetupButton(_explosionButton, name, icon);
+        public void SetupColorClear(string name, Sprite icon) => SetupButton(_colorClearButton, name, icon);
+
+
         // ========================== Dispose ============================
 
         private void OnDestroy()

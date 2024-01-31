@@ -212,6 +212,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _button: {fileID: 8275322262020001330}
   _image: {fileID: 8275322262020001333}
+  _text: {fileID: 8275322263079286323}
   _warmupSeconds: 10
   _durationSeconds: 10
 --- !u!1 &8275322263079286321

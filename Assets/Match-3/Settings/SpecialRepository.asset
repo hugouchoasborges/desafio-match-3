@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 008a2b31b3591fd49a927a64c059a7f7, type: 3}
+  m_Name: SpecialRepository
+  m_EditorClassIdentifier: 
+  _clearLineSpecial:
+    _icon: {fileID: 0}
+    _name: Clear Lines
+    _warmupSeconds: 15
+    _durationSeconds: 10
+  _explosionSpecial:
+    _icon: {fileID: 0}
+    _name: BOOM
+    _warmupSeconds: 20
+    _durationSeconds: 1
+  _colorClearSpecial:
+    _icon: {fileID: 0}
+    _name: Clear Color
+    _warmupSeconds: 30
+    _durationSeconds: 1

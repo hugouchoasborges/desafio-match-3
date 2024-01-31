@@ -2,12 +2,15 @@
 {
     public class Special
     {
-        public string name { get; private set; }
         public bool active { get; private set; }
+        public int warmupSeconds { get; private set; }
+        public int durationSeconds { get; private set; }
 
-        public Special(string name)
+        public Special(int warmupSeconds, int durationSeconds)
         {
-            this.name = name;
+            this.warmupSeconds = warmupSeconds;
+            this.durationSeconds = durationSeconds;
+
             this.active = false;
         }
 

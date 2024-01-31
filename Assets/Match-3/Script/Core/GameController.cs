@@ -2,7 +2,6 @@ using match3.board;
 using match3.progress;
 using match3.special;
 using match3.tile;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -105,6 +104,9 @@ namespace match3.core
 
                 if (ExplosionSpecial.active)
                     SwapTileExplosionSpecial(newBoard, matchedPosition);
+
+                if (ColorClearSpecial.active)
+                    SwapTileColorClearSpecial(newBoard, matchedPosition);
 
                 // Remove duplicated matches
                 matchedPosition = GetDistinctMatchedPositions(matchedPosition);
@@ -345,7 +347,6 @@ namespace match3.core
                         Random.Range(0, newBoard.lines));
 
                 matchedPosition.Add(randomV2I);
-                newBoard[randomV2I.x][randomV2I.y] = new Tile();
             }
         }
 
@@ -355,33 +356,24 @@ namespace match3.core
 
         public void SetSpecialColorClearActive(bool active)
         {
-            // TODO
-            throw new NotImplementedException();
+            ColorClearSpecial.SetActive(active);
         }
 
         private void SwapTileColorClearSpecial(Board newBoard, List<Vector2Int> matchedPosition)
         {
-            // If the clear lines special is active, look for matches and 
-            // include the entire row as a valid match
+            // If the color clear special is active, look for matches and 
+            // include the all other tiles from the same type as matches
 
-            List<int> linesToClear = new List<int>();
+            List<TileType> tileTypesToClear = new List<TileType>();
             foreach (var match in matchedPosition)
-            {
-                if (!linesToClear.Contains(match.y))
-                    linesToClear.Add(match.y);
-            }
+                if (!tileTypesToClear.Contains(newBoard[match.y][match.x].type))
+                    tileTypesToClear.Add(newBoard[match.y][match.x].type);
 
-            matchedPosition.Clear();
-
-            foreach (int y in linesToClear)
-            {
-                // Mark the entire line as a match
+            // Mark all tiles of the same type as a valid match
+            for (int y = 0; y < newBoard.lines; y++)
                 for (int x = 0; x < newBoard.columns; x++)
-                {
-                    matchedPosition.Add(new Vector2Int(x, y));
-                    newBoard[y][x] = new Tile();
-                }
-            }
+                    if (tileTypesToClear.Contains(newBoard[y][x].type))
+                        matchedPosition.Add(new Vector2Int(x, y));
         }
     }
 }

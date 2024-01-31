@@ -110,7 +110,10 @@ namespace match3.core
 
         private void OnSpecialColorClearClick()
         {
-            throw new NotImplementedException();
+            _gameController.SetSpecialColorClearActive(true);
+            _specialView.AnimateColorClearButton(_gameController.ColorClearSpecial,
+                onEffectFinishedCallback: () => _gameController.SetSpecialColorClearActive(false)
+                );
         }
 
         private void OnSpecialExplosionClick()

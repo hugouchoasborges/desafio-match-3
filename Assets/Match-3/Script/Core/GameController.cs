@@ -96,19 +96,22 @@ namespace match3.core
                 //Cleaning the matched tiles
                 List<Vector2Int> matchedPosition = new List<Vector2Int>();
                 for (int y = 0; y < newBoard.lines; y++)
-                {
                     for (int x = 0; x < newBoard.columns; x++)
-                    {
                         if (matchedTiles[y][x])
-                        {
                             matchedPosition.Add(new Vector2Int(x, y));
-                            newBoard[y][x] = new Tile();
-                        }
-                    }
-                }
 
                 if (ClearLinesSpecial.active)
                     SwapTileClearLinesSpecial(newBoard, matchedPosition);
+
+                if (ExplosionSpecial.active)
+                    SwapTileExplosionSpecial(newBoard, matchedPosition);
+
+                // Remove duplicated matches
+                matchedPosition = GetDistinctMatchedPositions(matchedPosition);
+
+                // Update the new board with the distinct matched positions
+                foreach (var match in matchedPosition)
+                    newBoard[match.y][match.x] = new Tile();
 
                 // Dropping the tiles
                 Dictionary<int, MovedTileInfo> movedTiles = new Dictionary<int, MovedTileInfo>();
@@ -180,6 +183,22 @@ namespace match3.core
             progress.AddScore(totalScore);
             _board = newBoard;
             return boardSequences;
+        }
+
+        private List<Vector2Int> GetDistinctMatchedPositions(List<Vector2Int> matchedPosition)
+        {
+            HashSet<Vector2Int> uniquePositions = new HashSet<Vector2Int>();
+            List<Vector2Int> uniqueList = new List<Vector2Int>();
+
+            foreach (Vector2Int pos in matchedPosition)
+            {
+                if (uniquePositions.Add(pos))
+                {
+                    uniqueList.Add(pos);
+                }
+            }
+
+            return uniqueList;
         }
 
         private static bool HasMatch(List<List<bool>> list)
@@ -305,11 +324,34 @@ namespace match3.core
             }
         }
 
+        // ========================== Explosion ============================
+
         public void SetSpecialExplosionActive(bool active)
         {
-            // TODO
-            throw new NotImplementedException();
+            ExplosionSpecial.SetActive(active);
         }
+
+        private void SwapTileExplosionSpecial(Board newBoard, List<Vector2Int> matchedPosition)
+        {
+            // If the explosion special is active, mark random tiles as valid matches
+
+            int explosionsCount = Random.Range(1, (newBoard.tilesCount - matchedPosition.Count) / 2);
+            //explosionsCount = 3;
+
+            for (int i = 0; i < explosionsCount; i++)
+            {
+                Vector2Int randomV2I = new Vector2Int(
+                        Random.Range(0, newBoard.columns),
+                        Random.Range(0, newBoard.lines));
+
+                matchedPosition.Add(randomV2I);
+                newBoard[randomV2I.x][randomV2I.y] = new Tile();
+            }
+        }
+
+
+        // ========================== Color Clear ============================
+
 
         public void SetSpecialColorClearActive(bool active)
         {
@@ -317,5 +359,29 @@ namespace match3.core
             throw new NotImplementedException();
         }
 
+        private void SwapTileColorClearSpecial(Board newBoard, List<Vector2Int> matchedPosition)
+        {
+            // If the clear lines special is active, look for matches and 
+            // include the entire row as a valid match
+
+            List<int> linesToClear = new List<int>();
+            foreach (var match in matchedPosition)
+            {
+                if (!linesToClear.Contains(match.y))
+                    linesToClear.Add(match.y);
+            }
+
+            matchedPosition.Clear();
+
+            foreach (int y in linesToClear)
+            {
+                // Mark the entire line as a match
+                for (int x = 0; x < newBoard.columns; x++)
+                {
+                    matchedPosition.Add(new Vector2Int(x, y));
+                    newBoard[y][x] = new Tile();
+                }
+            }
+        }
     }
 }

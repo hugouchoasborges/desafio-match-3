@@ -21,9 +21,9 @@ MonoBehaviour:
     _icon: {fileID: 0}
     _name: BOOM
     _warmupSeconds: 20
-    _durationSeconds: 1
+    _durationSeconds: 5
   _colorClearSpecial:
     _icon: {fileID: 0}
     _name: Clear Color
-    _warmupSeconds: 30
-    _durationSeconds: 1
+    _warmupSeconds: 25
+    _durationSeconds: 5

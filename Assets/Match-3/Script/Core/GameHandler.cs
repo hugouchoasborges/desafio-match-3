@@ -115,7 +115,10 @@ namespace match3.core
 
         private void OnSpecialExplosionClick()
         {
-            throw new NotImplementedException();
+            _gameController.SetSpecialExplosionActive(true);
+            _specialView.AnimateExplosionButton(_gameController.ExplosionSpecial,
+                onEffectFinishedCallback: () => _gameController.SetSpecialExplosionActive(false)
+                );
         }
 
 

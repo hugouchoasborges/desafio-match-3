@@ -9,6 +9,7 @@ namespace match3.board
         public int lines { get; private set; }
 
         public List<List<Tile>> tiles;
+        public int tilesCount { get; private set; } = 0;
 
         // Indexer to access tiles by [x][y]
         public List<Tile> this[int idx]
@@ -28,6 +29,7 @@ namespace match3.board
         private void Reset()
         {
             tiles = new List<List<Tile>>(lines);
+            tilesCount = 0;
 
             for (int y = 0; y < lines; y++)
             {
@@ -35,6 +37,7 @@ namespace match3.board
                 for (int x = 0; x < columns; x++)
                 {
                     tiles[y].Add(new Tile(id: -1, type: TileType.NONE));
+                    tilesCount++;
                 }
             }
         }

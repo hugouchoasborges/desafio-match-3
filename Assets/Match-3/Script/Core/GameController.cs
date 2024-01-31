@@ -1,4 +1,5 @@
 using match3.board;
+using match3.progress;
 using match3.tile;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,6 +9,7 @@ namespace match3.core
     public class GameController
     {
         private Board _board;
+        public Progress progress { get; private set; }
         private List<TileType> _tilesTypes;
         private int _tileCount;
 
@@ -19,6 +21,7 @@ namespace match3.core
                     _tilesTypes.Add(newTileType);
 
             _board = CreateBoard(boardWidth, boardHeight, _tilesTypes);
+            progress = new Progress();
             return _board;
         }
 
@@ -60,6 +63,7 @@ namespace match3.core
             newBoard[fromY][fromX] = newBoard[toY][toX];
             newBoard[toY][toX] = switchedTile;
 
+            int totalScore = 0;
             List<BoardSequence> boardSequences = new List<BoardSequence>();
             List<List<bool>> matchedTiles;
             while (HasMatch(matchedTiles = FindMatches(newBoard)))
@@ -135,14 +139,17 @@ namespace match3.core
                     }
                 }
 
+                totalScore += matchedPosition.Count;
                 BoardSequence sequence = new BoardSequence(
                     matchedPosition,
                     addedTiles,
-                    movedTilesList
+                    movedTilesList,
+                    totalScore
                     );
                 boardSequences.Add(sequence);
             }
 
+            progress.AddScore(totalScore);
             _board = newBoard;
             return boardSequences;
         }

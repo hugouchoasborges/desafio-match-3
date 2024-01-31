@@ -9,15 +9,19 @@ namespace match3.board
         public List<Vector2Int> matchedPosition { get; private set; }
         public List<AddedTileInfo> addedTiles { get; private set; }
         public List<MovedTileInfo> movedTiles { get; private set; }
+        public int score { get; private set; }
 
         public BoardSequence(
             List<Vector2Int> matchedPosition,
             List<AddedTileInfo> addedTiles,
-            List<MovedTileInfo> movedTiles)
+            List<MovedTileInfo> movedTiles,
+            int score
+            )
         {
             this.matchedPosition = matchedPosition;
             this.addedTiles = addedTiles;
             this.movedTiles = movedTiles;
+            this.score = score;
         }
 
         public override string ToString()

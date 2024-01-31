@@ -88,10 +88,13 @@ namespace match3.core
             newBoard[toY][toX] = switchedTile;
 
             int totalScore = 0;
+            int loopCount = 0;
             List<BoardSequence> boardSequences = new List<BoardSequence>();
             List<List<bool>> matchedTiles;
             while (HasMatch(matchedTiles = FindMatches(newBoard)))
             {
+                loopCount++;
+
                 //Cleaning the matched tiles
                 List<Vector2Int> matchedPosition = new List<Vector2Int>();
                 for (int y = 0; y < newBoard.lines; y++)
@@ -99,13 +102,13 @@ namespace match3.core
                         if (matchedTiles[y][x])
                             matchedPosition.Add(new Vector2Int(x, y));
 
-                if (ClearLinesSpecial.active)
+                if (loopCount == 1 && ClearLinesSpecial.active)
                     SwapTileClearLinesSpecial(newBoard, matchedPosition);
 
-                if (ExplosionSpecial.active)
+                if (loopCount == 1 && ExplosionSpecial.active)
                     SwapTileExplosionSpecial(newBoard, matchedPosition);
 
-                if (ColorClearSpecial.active)
+                if (loopCount == 1 && ColorClearSpecial.active)
                     SwapTileColorClearSpecial(newBoard, matchedPosition);
 
                 // Remove duplicated matches

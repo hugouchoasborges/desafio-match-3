@@ -1,5 +1,6 @@
 using DG.Tweening;
 using match3.board;
+using match3.progress;
 using match3.tile;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,8 @@ namespace match3.core
     {
         [Header("Components")]
         [SerializeField] private GameController _gameController;
-        [SerializeField] public BoardView boardView;
+        [SerializeField] private BoardView _boardView;
+        [SerializeField] private ProgressView _progressView;
 
         [Header("Board Settings")]
         [SerializeField] private TileType[] _availableTileTypes;
@@ -27,7 +29,8 @@ namespace match3.core
             _gameController = new GameController();
 
             Board board = _gameController.StartGame(_availableTileTypes, _boardWidth, _boardHeight);
-            boardView.CreateBoard(board, OnTileClick);
+            _boardView.CreateBoard(board, OnTileClick);
+            _progressView.UpdateProgress(_gameController.progress);
         }
 
         private void OnTileClick(int x, int y)
@@ -44,14 +47,14 @@ namespace match3.core
                 else
                 {
                     _isAnimating = true;
-                    boardView.SwapTiles(_selectedX, _selectedY, x, y).onComplete += () =>
+                    _boardView.SwapTiles(_selectedX, _selectedY, x, y).onComplete += () =>
                     {
                         // TODO: This code is creating a deep copy of the entire board just to check if the movement was valid
                         // Change it to check valid movements BEFORE them were made, not deep copying the entire board
                         bool isValid = _gameController.IsValidMovement(_selectedX, _selectedY, x, y);
                         if (!isValid)
                         {
-                            boardView.SwapTiles(x, y, _selectedX, _selectedY)
+                            _boardView.SwapTiles(x, y, _selectedX, _selectedY)
                             .onComplete += () => _isAnimating = false;
                         }
                         else
@@ -88,18 +91,26 @@ namespace match3.core
 
             // Link it to the next animation sequence OR to the onComplete callback
             if (boardSequences.Count > 0)
-                sequence.onComplete += () => AnimateBoardSequences(boardSequences, onComplete);
+                sequence.onComplete += () =>
+                {
+                    AnimateBoardSequences(boardSequences, onComplete);
+                    _progressView.SetScore(currentBoardSequence.score);
+                };
             else
-                sequence.onComplete += () => onComplete();
+                sequence.onComplete += () => 
+                {
+                    _progressView.UpdateProgress(_gameController.progress);
+                    onComplete(); 
+                };
         }
 
         private Sequence CreateBoardAnimationSequence(BoardSequence boardSequence)
         {
             Sequence sequence = DOTween.Sequence();
 
-            sequence.Append(boardView.DestroyTiles(boardSequence.matchedPosition));
-            sequence.Append(boardView.MoveTiles(boardSequence.movedTiles));
-            sequence.Append(boardView.CreateTile(boardSequence.addedTiles));
+            sequence.Append(_boardView.DestroyTiles(boardSequence.matchedPosition));
+            sequence.Append(_boardView.MoveTiles(boardSequence.movedTiles));
+            sequence.Append(_boardView.CreateTile(boardSequence.addedTiles));
 
             return sequence;
         }

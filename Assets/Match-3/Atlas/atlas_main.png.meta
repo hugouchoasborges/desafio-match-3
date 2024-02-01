@@ -5,6 +5,9 @@ TextureImporter:
   - first:
       213: 5733114181363729527
     second: tile_9slice
+  - first:
+      213: -7661315377860428100
+    second: tile_9slice_filled
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -86,7 +89,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 1
-        y: 63
+        y: 191
         width: 64
         height: 64
       alignment: 0
@@ -98,6 +101,27 @@ TextureImporter:
       bones: []
       spriteID: 77480fcf8fc109f40800000000000000
       internalID: 5733114181363729527
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tile_9slice_filled
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 125
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 21, y: 21, z: 21, w: 21}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cbe3466514a8da590800000000000000
+      internalID: -7661315377860428100
       vertices: []
       indices: 
       edges: []

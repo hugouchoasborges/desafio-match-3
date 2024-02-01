@@ -4,13 +4,14 @@
 # To import these sprites into your Unity project, download "TexturePackerImporter":
 # https://www.codeandweb.com/texturepacker/unity
 #
-# $TexturePacker:SmartUpdate:65dee4efc4134e323c8ff5d3c80271e5:e637f28acb375a8c6b1421d13a63617c:fdecc4925ee70ae57ffe55c09b8c285c$
+# $TexturePacker:SmartUpdate:575aeae594bbaab82dbb9f4f92b69318:299916731bd4f69ae9f82f8d1fb1e293:fdecc4925ee70ae57ffe55c09b8c285c$
 #
 :format=40300
 :texture=atlas_main.png
-:size=128x128
+:size=128x256
 :pivotpoints=enabled
 :borders=enabled
 :alphahandling=ClearTransparentPixels
 
-tile_9slice;1;63;64;64; 0.5;0.5; 21;21;21;21
+tile_9slice;1;191;64;64; 0.5;0.5; 21;21;21;21
+tile_9slice_filled;1;125;64;64; 0.5;0.5; 21;21;21;21

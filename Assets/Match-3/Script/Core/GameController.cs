@@ -119,38 +119,43 @@ namespace match3.core
                     newBoard[match.y][match.x] = new Tile();
 
                 // Dropping the tiles
-                Dictionary<int, MovedTileInfo> movedTiles = new Dictionary<int, MovedTileInfo>();
                 List<MovedTileInfo> movedTilesList = new List<MovedTileInfo>();
-                for (int i = 0; i < matchedPosition.Count; i++)
-                {
-                    int x = matchedPosition[i].x;
-                    int y = matchedPosition[i].y;
-                    if (y > 0)
-                    {
-                        for (int j = y; j > 0; j--)
-                        {
-                            Tile movedTile = newBoard[j - 1][x];
-                            newBoard[j][x] = movedTile;
-                            if (movedTile.type > TileType.NONE)
-                            {
-                                if (movedTiles.ContainsKey(movedTile.id))
-                                {
-                                    movedTiles[movedTile.id].to = new Vector2Int(x, j);
-                                }
-                                else
-                                {
-                                    MovedTileInfo movedTileInfo = new MovedTileInfo
-                                    {
-                                        from = new Vector2Int(x, j - 1),
-                                        to = new Vector2Int(x, j)
-                                    };
-                                    movedTiles.Add(movedTile.id, movedTileInfo);
-                                    movedTilesList.Add(movedTileInfo);
-                                }
-                            }
-                        }
+                Queue<int> availableSlots = new Queue<int>();
 
-                        newBoard[0][x] = new Tile();
+                for (int x = newBoard.columns - 1; x > -1; x--)
+                {
+                    availableSlots.Clear();
+
+                    // Go up every column, dropping valid tiles to the lowest available slot
+                    // Look at this as a TETRIS game
+                    for (int y = newBoard.lines - 1; y > -1; y--)
+                    {
+                        // Mark empty slots as free\available
+                        if (newBoard[y][x].type == TileType.NONE)
+                        {
+                            if(!availableSlots.Contains(y))
+                                availableSlots.Enqueue(y);
+                        }
+                        else if(availableSlots.Count > 0)
+                        {
+                            // If there are free slots, move the current tile to the bottom
+                            Tile movedTile = newBoard[y][x];
+                            int availableY = availableSlots.Dequeue();
+                            newBoard[availableY][x] = movedTile;
+
+                            // Create the MoveTileInfo for this action
+                            MovedTileInfo movedTileInfo = new MovedTileInfo
+                            {
+                                from = new Vector2Int(x, y),
+                                to = new Vector2Int(x, availableY)
+                            };
+                            movedTilesList.Add(movedTileInfo);
+
+                            // Now add the current slot as free
+                            newBoard[y][x] = new Tile();
+                            if (!availableSlots.Contains(y))
+                                availableSlots.Enqueue(y);
+                        }
                     }
                 }
 

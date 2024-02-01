@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace match3.special
@@ -10,6 +11,8 @@ namespace match3.special
         [SerializeField] private SpecialButtonView _explosionButton;
         [SerializeField] private SpecialButtonView _colorClearButton;
 
+        private List<SpecialButtonView> _allButtons = new List<SpecialButtonView>();
+
         private Action _onClearLinesCallback;
         private Action _onExplosionCallback;
         private Action _onColorClearCallback;
@@ -19,6 +22,10 @@ namespace match3.special
             _clearLinesButton.AddOnClickListener(OnClearLinesTriggered);
             _explosionButton.AddOnClickListener(OnExplosionTriggered);
             _colorClearButton.AddOnClickListener(OnColorClearTriggered);
+
+            _allButtons.Add(_clearLinesButton);
+            _allButtons.Add(_explosionButton);
+            _allButtons.Add(_colorClearButton);
         }
 
         public void SetOnClickEvents(
@@ -85,6 +92,25 @@ namespace match3.special
         public void SetupExplosion(string name, Sprite icon) => SetupButton(_explosionButton, name, icon);
         public void SetupColorClear(string name, Sprite icon) => SetupButton(_colorClearButton, name, icon);
 
+
+        public void SetAllSpecialsInteractable(bool interactable, bool affectAnimating = false)
+        {
+            foreach (var button in _allButtons)
+            {
+                if (!affectAnimating && button.isAnimating)
+                    continue;
+
+                button.interactable = interactable;
+            }
+        }
+
+        public bool IsAnySpecialActive()
+        {
+            foreach (var button in _allButtons)
+                if (button.isActive) return true;
+
+            return false;
+        }
 
         // ========================== Dispose ============================
 

@@ -100,27 +100,67 @@ namespace match3.core
 
         // ========================== Specials Trigger ============================
 
+        private void SetAllSpecialsInteractable(bool interactable, bool affectAnimating = false)
+        {
+            _specialView.SetAllSpecialsInteractable(interactable, affectAnimating);
+        }
+
+        private bool IsAnySpecialActive()
+        {
+            return _specialView.IsAnySpecialActive();
+        }
+
         private void OnSpecialClearLinesClick()
         {
+            SetAllSpecialsInteractable(false);
             _gameController.SetSpecialClearLinesActive(true);
             _specialView.AnimateClearLinesButton(_gameController.ClearLinesSpecial,
-                onEffectFinishedCallback: () => _gameController.SetSpecialClearLinesActive(false)
+                onEffectFinishedCallback: () =>
+                {
+                    _gameController.SetSpecialClearLinesActive(false);
+                    SetAllSpecialsInteractable(true);
+                },
+                onWarmupFinishedCallback: () =>
+                {
+                    if (!IsAnySpecialActive())
+                        SetAllSpecialsInteractable(true);
+                }
                 );
         }
 
         private void OnSpecialColorClearClick()
         {
+            SetAllSpecialsInteractable(false);
             _gameController.SetSpecialColorClearActive(true);
             _specialView.AnimateColorClearButton(_gameController.ColorClearSpecial,
-                onEffectFinishedCallback: () => _gameController.SetSpecialColorClearActive(false)
+                onEffectFinishedCallback: () =>
+                {
+                    _gameController.SetSpecialColorClearActive(false);
+                    SetAllSpecialsInteractable(true);
+                },
+                onWarmupFinishedCallback: () =>
+                {
+                    if (!IsAnySpecialActive())
+                        SetAllSpecialsInteractable(true);
+                }
                 );
         }
 
         private void OnSpecialExplosionClick()
         {
+            SetAllSpecialsInteractable(false);
             _gameController.SetSpecialExplosionActive(true);
             _specialView.AnimateExplosionButton(_gameController.ExplosionSpecial,
-                onEffectFinishedCallback: () => _gameController.SetSpecialExplosionActive(false)
+                onEffectFinishedCallback: () =>
+                {
+                    _gameController.SetSpecialExplosionActive(false);
+                    SetAllSpecialsInteractable(true);
+                },
+                onWarmupFinishedCallback: () =>
+                {
+                    if (!IsAnySpecialActive())
+                        SetAllSpecialsInteractable(true);
+                }
                 );
         }
 

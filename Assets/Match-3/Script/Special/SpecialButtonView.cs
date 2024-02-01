@@ -21,11 +21,25 @@ namespace match3.special
         [SerializeField] private Color _warmingUpColor = Color.red;
         private Color _defaultColor = Color.white;
 
+        // Properties
+        public bool interactable
+        {
+            get => _button.interactable;
+            set => _button.interactable = value;
+        }
+
         // Click
         private Action _onClickCallback;
 
         private Tween _warmupDelayedCall = null;
         private Tween _durationDelayedCall = null;
+
+        private bool _active = false;
+        private bool _warmingUp = false;
+
+        public bool isActive => _active;
+        public bool isWarmingUp => _warmingUp;
+        public bool isAnimating => isActive || isWarmingUp;
 
         private void OnEnable()
         {
@@ -54,9 +68,6 @@ namespace match3.special
 
         private void OnClick()
         {
-            // Disable button
-            _button.interactable = false;
-
             // Callback
             _onClickCallback?.Invoke();
         }
@@ -64,27 +75,36 @@ namespace match3.special
 
         // ========================== Tween Animations ============================
 
-        public void AnimateButton(float durationSeconds, float warmupSeconds, 
+        public void AnimateButton(float durationSeconds, float warmupSeconds,
             Action onEffectFinishedCallback = null,
             Action onWarmupFinishedCallback = null)
         {
             KillTweens();
 
             // Activation animation
+            _active = true;
             _background.color = _activatedColor;
             _durationDelayedCall = AnimateButtonFillAmount(1, 0, durationSeconds);
             _durationDelayedCall.onComplete = () =>
             {
+                _active = false;
+                _warmingUp = true;
                 _background.color = _warmingUpColor;
-                onEffectFinishedCallback?.Invoke();
+
+                Action callback = onEffectFinishedCallback;
+                onEffectFinishedCallback = null;
+                callback?.Invoke();
 
                 // Warmup Animation
                 _warmupDelayedCall = AnimateButtonFillAmount(0, 1, warmupSeconds);
                 _warmupDelayedCall.onComplete = () =>
                 {
+                    _warmingUp = false;
                     _background.color = _defaultColor;
-                    _button.interactable = true;
-                    onWarmupFinishedCallback?.Invoke();
+
+                    Action callback = onWarmupFinishedCallback;
+                    onWarmupFinishedCallback = null;
+                    callback?.Invoke();
                 };
             };
         }

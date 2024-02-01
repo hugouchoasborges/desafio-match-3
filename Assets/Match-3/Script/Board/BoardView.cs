@@ -16,6 +16,7 @@ namespace match3.board
 
         private TileSpotView[][] _tileSpots;
         private TileView[][] _tiles;
+        private TileView _selectedTile;
 
         private Action<int, int> _onTileClickCallback;
 
@@ -91,6 +92,24 @@ namespace match3.board
         // ========================== Tiles Operations ============================
         // ----------------------------------------------------------------------------------
 
+
+        // ========================== Select ============================
+
+        public void SetTileSelected(int x, int y)
+        {
+            if (x < 0 || y < 0)
+            {
+                if (_selectedTile != null)
+                {
+                    _selectedTile.SetSelected(false);
+                    _selectedTile = null;
+                    return;
+                }
+            }
+
+            _selectedTile = _tiles[y][x];
+            _selectedTile.SetSelected(true);
+        }
 
         // ========================== Swap ============================
 

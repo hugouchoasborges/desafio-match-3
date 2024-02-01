@@ -1,10 +1,14 @@
 ﻿using DG.Tweening;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace match3.tile
 {
     public class TileView : MonoBehaviour
     {
+        [Header("Components")]
+        [SerializeField] private Image _selectionIcon;
+
         public void SetParent(Transform parentTransform, bool worldPositionStays = false)
         {
             transform.SetParent(parentTransform, worldPositionStays);
@@ -13,6 +17,11 @@ namespace match3.tile
         public void SetPosition(Vector3 position)
         {
             transform.position = position;
+        }
+
+        public void SetSelected(bool selected)
+        {
+            _selectionIcon.enabled = selected;
         }
 
         /// <summary>

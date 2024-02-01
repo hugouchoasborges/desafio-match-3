@@ -62,6 +62,8 @@ namespace match3.core
                 {
                     _selectedX = -1;
                     _selectedY = -1;
+
+                    _boardView.SetTileSelected(_selectedX, _selectedY);
                 }
                 else
                 {
@@ -87,6 +89,8 @@ namespace match3.core
 
                         _selectedX = -1;
                         _selectedY = -1;
+
+                        _boardView.SetTileSelected(_selectedX, _selectedY);
                     };
                 }
             }
@@ -94,6 +98,8 @@ namespace match3.core
             {
                 _selectedX = x;
                 _selectedY = y;
+
+                _boardView.SetTileSelected(_selectedX, _selectedY);
             }
         }
 

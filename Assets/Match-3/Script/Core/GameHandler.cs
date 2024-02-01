@@ -18,6 +18,7 @@ namespace match3.core
         [SerializeField] private ProgressView _progressView;
         [SerializeField] private SpecialView _specialView;
         [SerializeField] private SpecialRepository _specialRepository;
+        [SerializeField] private BoardOffsetView _boardOffsetView;
 
         [Header("Board Settings")]
         [SerializeField] private TileType[] _availableTileTypes;
@@ -48,6 +49,8 @@ namespace match3.core
             _specialView.SetupClearLines(_specialRepository.clearLinesSpecial.name, _specialRepository.clearLinesSpecial.icon);
             _specialView.SetupExplosion(_specialRepository.explosionSpecial.name, _specialRepository.explosionSpecial.icon);
             _specialView.SetupColorClear(_specialRepository.colorClearSpecial.name, _specialRepository.colorClearSpecial.icon);
+
+            _boardOffsetView.AnimateTransitionDown();
         }
 
         // ========================== Tile Click ============================

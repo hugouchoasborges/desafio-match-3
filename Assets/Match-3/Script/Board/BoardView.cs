@@ -130,14 +130,21 @@ namespace match3.board
 
         public Tween DestroyTiles(List<Vector2Int> matchedPosition)
         {
+            Sequence seq = DOTween.Sequence();
             for (int i = 0; i < matchedPosition.Count; i++)
             {
-                Vector2Int position = matchedPosition[i];
                 // TODO: Queue this to a pool
-                Destroy(_tiles[position.y][position.x].gameObject);
+                Vector2Int position = matchedPosition[i];
+                TileView tile = _tiles[position.y][position.x];
                 _tiles[position.y][position.x] = null;
+
+                seq.Join(tile.transform.DOScale(0f, 0.2f)).onComplete += () =>
+                {
+                    Destroy(tile.gameObject);
+                };
             }
-            return DOVirtual.DelayedCall(0.2f, () => { });
+
+            return seq;
         }
 
         // ========================== Move ============================

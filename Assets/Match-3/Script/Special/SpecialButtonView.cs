@@ -11,11 +11,15 @@ namespace match3.special
         [Header("Components")]
         [SerializeField] private Button _button;
         [SerializeField] private Image _image;
+        [SerializeField] private Image _background;
         [SerializeField] private TMP_Text _text;
 
         [Header("Special Settings")]
         [SerializeField][Range(0, 30)] private int _warmupSeconds = 10;
         [SerializeField][Range(0, 30)] private int _durationSeconds = 10;
+        [SerializeField] private Color _activatedColor = Color.green;
+        [SerializeField] private Color _warmingUpColor = Color.red;
+        private Color _defaultColor = Color.white;
 
         // Click
         private Action _onClickCallback;
@@ -37,6 +41,7 @@ namespace match3.special
         {
             _text.text = name;
             if (icon != null) _image.sprite = icon;
+            _defaultColor = _background.color;
         }
 
 
@@ -66,16 +71,18 @@ namespace match3.special
             KillTweens();
 
             // Activation animation
-            _warmupDelayedCall = AnimateButtonFillAmount(1, 0, durationSeconds);
-            _warmupDelayedCall.onComplete = () =>
+            _background.color = _activatedColor;
+            _durationDelayedCall = AnimateButtonFillAmount(1, 0, durationSeconds);
+            _durationDelayedCall.onComplete = () =>
             {
-
+                _background.color = _warmingUpColor;
                 onEffectFinishedCallback?.Invoke();
 
                 // Warmup Animation
-                _durationDelayedCall = AnimateButtonFillAmount(0, 1, warmupSeconds);
-                _durationDelayedCall.onComplete = () =>
+                _warmupDelayedCall = AnimateButtonFillAmount(0, 1, warmupSeconds);
+                _warmupDelayedCall.onComplete = () =>
                 {
+                    _background.color = _defaultColor;
                     _button.interactable = true;
                     onWarmupFinishedCallback?.Invoke();
                 };

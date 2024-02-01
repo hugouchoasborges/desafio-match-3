@@ -1,8 +1,11 @@
 using match3.board;
 using match3.progress;
+using match3.special;
 using match3.tile;
 using System.Collections.Generic;
 using UnityEngine;
+
+using Random = UnityEngine.Random;
 
 namespace match3.core
 {
@@ -10,6 +13,12 @@ namespace match3.core
     {
         private Board _board;
         public Progress progress { get; private set; }
+
+        // Specials
+        public Special ClearLinesSpecial { get; private set; }
+        public Special ExplosionSpecial { get; private set; }
+        public Special ColorClearSpecial { get; private set; }
+
         private List<TileType> _tilesTypes;
         private int _tileCount;
 
@@ -21,8 +30,23 @@ namespace match3.core
                     _tilesTypes.Add(newTileType);
 
             _board = CreateBoard(boardWidth, boardHeight, _tilesTypes);
+
+            // Progress
             progress = new Progress();
+
             return _board;
+        }
+
+        public void SetSpecials(
+            int clearLinesDurationSec, int clearLinesWarmupSec,
+            int explosionDurationSec, int explosionWarmupSec,
+            int colorClearDurationSec, int colorClearWarmupSec
+            )
+        {
+            // Specials
+            ClearLinesSpecial = new Special(clearLinesDurationSec, clearLinesWarmupSec);
+            ExplosionSpecial = new Special(explosionDurationSec, explosionWarmupSec);
+            ColorClearSpecial = new Special(colorClearDurationSec, colorClearWarmupSec);
         }
 
         public bool IsValidMovement(int fromX, int fromY, int toX, int toY)
@@ -64,57 +88,74 @@ namespace match3.core
             newBoard[toY][toX] = switchedTile;
 
             int totalScore = 0;
+            int loopCount = 0;
             List<BoardSequence> boardSequences = new List<BoardSequence>();
             List<List<bool>> matchedTiles;
             while (HasMatch(matchedTiles = FindMatches(newBoard)))
             {
+                loopCount++;
+
                 //Cleaning the matched tiles
                 List<Vector2Int> matchedPosition = new List<Vector2Int>();
                 for (int y = 0; y < newBoard.lines; y++)
-                {
                     for (int x = 0; x < newBoard.columns; x++)
-                    {
                         if (matchedTiles[y][x])
-                        {
                             matchedPosition.Add(new Vector2Int(x, y));
-                            newBoard[y][x] = new Tile();
-                        }
-                    }
-                }
+
+                if (loopCount == 1 && ClearLinesSpecial.active)
+                    SwapTileClearLinesSpecial(newBoard, matchedPosition);
+
+                if (loopCount == 1 && ExplosionSpecial.active)
+                    SwapTileExplosionSpecial(newBoard, matchedPosition);
+
+                if (loopCount == 1 && ColorClearSpecial.active)
+                    SwapTileColorClearSpecial(newBoard, matchedPosition);
+
+                // Remove duplicated matches
+                matchedPosition = GetDistinctMatchedPositions(matchedPosition);
+
+                // Update the new board with the distinct matched positions
+                foreach (var match in matchedPosition)
+                    newBoard[match.y][match.x] = new Tile();
 
                 // Dropping the tiles
-                Dictionary<int, MovedTileInfo> movedTiles = new Dictionary<int, MovedTileInfo>();
                 List<MovedTileInfo> movedTilesList = new List<MovedTileInfo>();
-                for (int i = 0; i < matchedPosition.Count; i++)
-                {
-                    int x = matchedPosition[i].x;
-                    int y = matchedPosition[i].y;
-                    if (y > 0)
-                    {
-                        for (int j = y; j > 0; j--)
-                        {
-                            Tile movedTile = newBoard[j - 1][x];
-                            newBoard[j][x] = movedTile;
-                            if (movedTile.type > TileType.NONE)
-                            {
-                                if (movedTiles.ContainsKey(movedTile.id))
-                                {
-                                    movedTiles[movedTile.id].to = new Vector2Int(x, j);
-                                }
-                                else
-                                {
-                                    MovedTileInfo movedTileInfo = new MovedTileInfo
-                                    {
-                                        from = new Vector2Int(x, j - 1),
-                                        to = new Vector2Int(x, j)
-                                    };
-                                    movedTiles.Add(movedTile.id, movedTileInfo);
-                                    movedTilesList.Add(movedTileInfo);
-                                }
-                            }
-                        }
+                Queue<int> availableSlots = new Queue<int>();
 
-                        newBoard[0][x] = new Tile();
+                for (int x = newBoard.columns - 1; x > -1; x--)
+                {
+                    availableSlots.Clear();
+
+                    // Go up every column, dropping valid tiles to the lowest available slot
+                    // Look at this as a TETRIS game
+                    for (int y = newBoard.lines - 1; y > -1; y--)
+                    {
+                        // Mark empty slots as free\available
+                        if (newBoard[y][x].type == TileType.NONE)
+                        {
+                            if(!availableSlots.Contains(y))
+                                availableSlots.Enqueue(y);
+                        }
+                        else if(availableSlots.Count > 0)
+                        {
+                            // If there are free slots, move the current tile to the bottom
+                            Tile movedTile = newBoard[y][x];
+                            int availableY = availableSlots.Dequeue();
+                            newBoard[availableY][x] = movedTile;
+
+                            // Create the MoveTileInfo for this action
+                            MovedTileInfo movedTileInfo = new MovedTileInfo
+                            {
+                                from = new Vector2Int(x, y),
+                                to = new Vector2Int(x, availableY)
+                            };
+                            movedTilesList.Add(movedTileInfo);
+
+                            // Now add the current slot as free
+                            newBoard[y][x] = new Tile();
+                            if (!availableSlots.Contains(y))
+                                availableSlots.Enqueue(y);
+                        }
                     }
                 }
 
@@ -152,6 +193,22 @@ namespace match3.core
             progress.AddScore(totalScore);
             _board = newBoard;
             return boardSequences;
+        }
+
+        private List<Vector2Int> GetDistinctMatchedPositions(List<Vector2Int> matchedPosition)
+        {
+            HashSet<Vector2Int> uniquePositions = new HashSet<Vector2Int>();
+            List<Vector2Int> uniqueList = new List<Vector2Int>();
+
+            foreach (Vector2Int pos in matchedPosition)
+            {
+                if (uniquePositions.Add(pos))
+                {
+                    uniqueList.Add(pos);
+                }
+            }
+
+            return uniqueList;
         }
 
         private static bool HasMatch(List<List<bool>> list)
@@ -237,6 +294,94 @@ namespace match3.core
             }
 
             return board;
+        }
+
+
+
+        // ----------------------------------------------------------------------------------
+        // ========================== Specials ============================
+        // ----------------------------------------------------------------------------------
+
+        // ========================== Clear Lines============================
+
+        public void SetSpecialClearLinesActive(bool active)
+        {
+            ClearLinesSpecial.SetActive(active);
+        }
+
+        private void SwapTileClearLinesSpecial(Board newBoard, List<Vector2Int> matchedPosition)
+        {
+            // If the clear lines special is active, look for matches and 
+            // include the entire row as a valid match
+
+            List<int> linesToClear = new List<int>();
+            foreach (var match in matchedPosition)
+            {
+                if (!linesToClear.Contains(match.y))
+                    linesToClear.Add(match.y);
+            }
+
+            matchedPosition.Clear();
+
+            foreach (int y in linesToClear)
+            {
+                // Mark the entire line as a match
+                for (int x = 0; x < newBoard.columns; x++)
+                {
+                    matchedPosition.Add(new Vector2Int(x, y));
+                    newBoard[y][x] = new Tile();
+                }
+            }
+        }
+
+        // ========================== Explosion ============================
+
+        public void SetSpecialExplosionActive(bool active)
+        {
+            ExplosionSpecial.SetActive(active);
+        }
+
+        private void SwapTileExplosionSpecial(Board newBoard, List<Vector2Int> matchedPosition)
+        {
+            // If the explosion special is active, mark random tiles as valid matches
+
+            int explosionsCount = Random.Range(1, (newBoard.tilesCount - matchedPosition.Count) / 2);
+            //explosionsCount = 3;
+
+            for (int i = 0; i < explosionsCount; i++)
+            {
+                Vector2Int randomV2I = new Vector2Int(
+                        Random.Range(0, newBoard.columns),
+                        Random.Range(0, newBoard.lines));
+
+                matchedPosition.Add(randomV2I);
+            }
+        }
+
+
+        // ========================== Color Clear ============================
+
+
+        public void SetSpecialColorClearActive(bool active)
+        {
+            ColorClearSpecial.SetActive(active);
+        }
+
+        private void SwapTileColorClearSpecial(Board newBoard, List<Vector2Int> matchedPosition)
+        {
+            // If the color clear special is active, look for matches and 
+            // include the all other tiles from the same type as matches
+
+            List<TileType> tileTypesToClear = new List<TileType>();
+            foreach (var match in matchedPosition)
+                if (!tileTypesToClear.Contains(newBoard[match.y][match.x].type))
+                    tileTypesToClear.Add(newBoard[match.y][match.x].type);
+
+            // Mark all tiles of the same type as a valid match
+            for (int y = 0; y < newBoard.lines; y++)
+                for (int x = 0; x < newBoard.columns; x++)
+                    if (tileTypesToClear.Contains(newBoard[y][x].type))
+                        matchedPosition.Add(new Vector2Int(x, y));
         }
     }
 }

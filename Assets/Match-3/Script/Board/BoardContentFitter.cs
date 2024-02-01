@@ -41,16 +41,6 @@ namespace match3.board
             UpdateLayout();
         }
 
-        private void OnEnable()
-        {
-            _backgroundContainer.gameObject.SetActive(true);
-        }
-
-        private void OnDisable()
-        {
-            _backgroundContainer.gameObject.SetActive(false);
-        }
-
         void OnRectTransformDimensionsChange()
         {
             UpdateLayout();
@@ -80,7 +70,7 @@ namespace match3.board
             yield return new WaitForEndOfFrame();
 
             // Background adjustments
-            if(_topLeftChild == null)
+            if (_topLeftChild == null)
                 _topLeftChild = _layout.gameObject.transform.GetChild(1);
 
             _backgroundContainer.sizeDelta = new Vector2(_layout.minWidth, _layout.minHeight);
@@ -88,7 +78,17 @@ namespace match3.board
                 _topLeftChild.position.x - (_layout.cellSize.x / 2),
                 _topLeftChild.position.y + (_layout.cellSize.y / 2)
                 );
+
+            if (Application.isPlaying)
+                _backgroundContainer.gameObject.SetActive(true);
         }
+
+#if UNITY_EDITOR
+        void OnApplicationQuit()
+        {
+            _backgroundContainer.gameObject.SetActive(false);
+        }
+#endif
 
         [ContextMenu("Reset Fit")]
         private void ResetLayout()

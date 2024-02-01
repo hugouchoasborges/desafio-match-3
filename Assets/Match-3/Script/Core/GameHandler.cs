@@ -1,6 +1,8 @@
 using DG.Tweening;
 using match3.board;
 using match3.progress;
+using match3.settings;
+using match3.special;
 using match3.tile;
 using System;
 using System.Collections.Generic;
@@ -14,6 +16,8 @@ namespace match3.core
         [SerializeField] private GameController _gameController;
         [SerializeField] private BoardView _boardView;
         [SerializeField] private ProgressView _progressView;
+        [SerializeField] private SpecialView _specialView;
+        [SerializeField] private SpecialRepository _specialRepository;
 
         [Header("Board Settings")]
         [SerializeField] private TileType[] _availableTileTypes;
@@ -29,9 +33,24 @@ namespace match3.core
             _gameController = new GameController();
 
             Board board = _gameController.StartGame(_availableTileTypes, _boardWidth, _boardHeight);
+            _gameController.SetSpecials(
+                _specialRepository.clearLinesSpecial.durationSeconds, _specialRepository.clearLinesSpecial.warmupSeconds,
+                _specialRepository.explosionSpecial.durationSeconds, _specialRepository.explosionSpecial.warmupSeconds,
+                _specialRepository.colorClearSpecial.durationSeconds, _specialRepository.colorClearSpecial.warmupSeconds
+                );
+
             _boardView.CreateBoard(board, OnTileClick);
             _progressView.UpdateProgress(_gameController.progress);
+
+            // Specials
+            _specialView.SetOnClickEvents(OnSpecialClearLinesClick, OnSpecialExplosionClick, OnSpecialColorClearClick);
+
+            _specialView.SetupClearLines(_specialRepository.clearLinesSpecial.name, _specialRepository.clearLinesSpecial.icon);
+            _specialView.SetupExplosion(_specialRepository.explosionSpecial.name, _specialRepository.explosionSpecial.icon);
+            _specialView.SetupColorClear(_specialRepository.colorClearSpecial.name, _specialRepository.colorClearSpecial.icon);
         }
+
+        // ========================== Tile Click ============================
 
         private void OnTileClick(int x, int y)
         {
@@ -78,6 +97,77 @@ namespace match3.core
             }
         }
 
+
+        // ========================== Specials Trigger ============================
+
+        private void SetAllSpecialsInteractable(bool interactable, bool affectAnimating = false)
+        {
+            _specialView.SetAllSpecialsInteractable(interactable, affectAnimating);
+        }
+
+        private bool IsAnySpecialActive()
+        {
+            return _specialView.IsAnySpecialActive();
+        }
+
+        private void OnSpecialClearLinesClick()
+        {
+            SetAllSpecialsInteractable(false);
+            _gameController.SetSpecialClearLinesActive(true);
+            _specialView.AnimateClearLinesButton(_gameController.ClearLinesSpecial,
+                onEffectFinishedCallback: () =>
+                {
+                    _gameController.SetSpecialClearLinesActive(false);
+                    SetAllSpecialsInteractable(true);
+                },
+                onWarmupFinishedCallback: () =>
+                {
+                    if (!IsAnySpecialActive())
+                        SetAllSpecialsInteractable(true);
+                }
+                );
+        }
+
+        private void OnSpecialColorClearClick()
+        {
+            SetAllSpecialsInteractable(false);
+            _gameController.SetSpecialColorClearActive(true);
+            _specialView.AnimateColorClearButton(_gameController.ColorClearSpecial,
+                onEffectFinishedCallback: () =>
+                {
+                    _gameController.SetSpecialColorClearActive(false);
+                    SetAllSpecialsInteractable(true);
+                },
+                onWarmupFinishedCallback: () =>
+                {
+                    if (!IsAnySpecialActive())
+                        SetAllSpecialsInteractable(true);
+                }
+                );
+        }
+
+        private void OnSpecialExplosionClick()
+        {
+            SetAllSpecialsInteractable(false);
+            _gameController.SetSpecialExplosionActive(true);
+            _specialView.AnimateExplosionButton(_gameController.ExplosionSpecial,
+                onEffectFinishedCallback: () =>
+                {
+                    _gameController.SetSpecialExplosionActive(false);
+                    SetAllSpecialsInteractable(true);
+                },
+                onWarmupFinishedCallback: () =>
+                {
+                    if (!IsAnySpecialActive())
+                        SetAllSpecialsInteractable(true);
+                }
+                );
+        }
+
+
+        // ========================== Board Animation ============================
+
+
         private void AnimateBoardSequences(List<BoardSequence> boardSequences, Action onComplete)
         {
             if (boardSequences.Count == 0) return;
@@ -97,10 +187,10 @@ namespace match3.core
                     _progressView.SetScore(currentBoardSequence.score);
                 };
             else
-                sequence.onComplete += () => 
+                sequence.onComplete += () =>
                 {
                     _progressView.UpdateProgress(_gameController.progress);
-                    onComplete(); 
+                    onComplete();
                 };
         }
 

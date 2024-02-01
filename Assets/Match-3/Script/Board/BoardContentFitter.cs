@@ -31,7 +31,7 @@ namespace match3.board
         [Range(0, 1)]
         private float _axisSizePerc = 1f;
 
-        private Transform _topLeftChild;
+        private RectTransform _topLeftChild;
 
         void Start()
         {
@@ -71,12 +71,12 @@ namespace match3.board
 
             // Background adjustments
             if (_topLeftChild == null)
-                _topLeftChild = _layout.gameObject.transform.GetChild(1);
+                _topLeftChild = _layout.gameObject.transform.GetChild(1) as RectTransform;
 
             _backgroundContainer.sizeDelta = new Vector2(_layout.minWidth, _layout.minHeight);
-            _backgroundContainer.position = new Vector2(
-                _topLeftChild.position.x - (_layout.cellSize.x / 2),
-                _topLeftChild.position.y + (_layout.cellSize.y / 2)
+            _backgroundContainer.anchoredPosition = new Vector2(
+                _topLeftChild.anchoredPosition.x - (_layout.cellSize.x / 2),
+                _topLeftChild.anchoredPosition.y + (_layout.cellSize.y / 2)
                 );
 
             if (Application.isPlaying)

@@ -1,4 +1,5 @@
 ﻿using DG.Tweening;
+using System;
 using UnityEngine;
 
 namespace match3.board
@@ -11,6 +12,9 @@ namespace match3.board
 
         private Vector2 _topAnchoredPosition;
         private Vector2 _originalAnchoredPosition;
+
+        [SerializeField]
+        private CanvasGroup _boardCanvasGroup;
 
         private void Awake()
         {
@@ -37,17 +41,70 @@ namespace match3.board
                 out _topAnchoredPosition);
         }
 
-        public void AnimateTransitionDown(float duration = 1f)
+        public void AnimateTransitionDown(float duration = 1f, Action onComplete = null)
         {
+            _boardCanvasGroup.alpha = 0;
             _rectTransform.anchoredPosition = _topAnchoredPosition;
 
             // Use DOTween to lerp between the start and end positions
-            DOTween.To(
-                () => _rectTransform.anchoredPosition, 
-                position => _rectTransform.anchoredPosition = position, 
+
+            Sequence sequence = DOTween.Sequence();
+
+            Tween moveTween = DOTween.To(
+                () => _rectTransform.anchoredPosition,
+                position => _rectTransform.anchoredPosition = position,
                 _originalAnchoredPosition, duration)
                 .SetEase(Ease.OutQuad)
                 .SetDelay(.5f); // Delay before starting it
+            sequence.Join(moveTween);
+
+
+            Tween alphaTween = DOTween.To(
+                () => _boardCanvasGroup.alpha,
+                alpha => _boardCanvasGroup.alpha = alpha,
+                1, duration)
+                .SetEase(Ease.OutQuad)
+                .SetDelay(.5f); // Delay before starting it
+            sequence.Join(alphaTween);
+
+
+            sequence.onComplete += () =>
+            {
+                onComplete?.Invoke();
+            };
+        }
+
+        public void AnimateTransitionUp(float duration = 1f, Action onComplete = null)
+        {
+            _boardCanvasGroup.alpha = 1;
+            _rectTransform.anchoredPosition = _originalAnchoredPosition;
+
+            // Use DOTween to lerp between the start and end positions
+
+            Sequence sequence = DOTween.Sequence();
+
+            Tween moveTween = DOTween.To(
+                () => _rectTransform.anchoredPosition,
+                position => _rectTransform.anchoredPosition = position,
+                _topAnchoredPosition, duration)
+                .SetEase(Ease.OutQuad)
+                .SetDelay(.5f); // Delay before starting it
+            sequence.Join(moveTween);
+
+
+            Tween alphaTween = DOTween.To(
+                () => _boardCanvasGroup.alpha,
+                alpha => _boardCanvasGroup.alpha = alpha,
+                0, duration)
+                .SetEase(Ease.OutQuad)
+                .SetDelay(.5f); // Delay before starting it
+            sequence.Join(alphaTween);
+
+
+            sequence.onComplete += () =>
+            {
+                onComplete?.Invoke();
+            };
         }
     }
 }

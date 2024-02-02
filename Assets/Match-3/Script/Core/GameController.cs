@@ -1,5 +1,6 @@
 using match3.board;
 using match3.progress;
+using match3.settings;
 using match3.special;
 using match3.tile;
 using System.Collections.Generic;
@@ -14,25 +15,32 @@ namespace match3.core
         public Progress progress { get; private set; }
 
         // Specials
-        public Special ClearLinesSpecial { get; private set; }
-        public Special ExplosionSpecial { get; private set; }
-        public Special ColorClearSpecial { get; private set; }
-        public Special TipSpecial { get; private set; }
+        public Special clearLinesSpecial { get; private set; }
+        public Special explosionSpecial { get; private set; }
+        public Special colorClearSpecial { get; private set; }
+        public Special tipSpecial { get; private set; }
+
+        public Level currentLevel { get; private set; }
 
         private List<TileType> _tilesTypes;
         private int _tileCount;
 
-        public Board StartGame(TileType[] _availableTileTypes, int boardWidth, int boardHeight)
+        public Board StartGame(Level level)
         {
+            currentLevel = level;
+
             _tilesTypes = new List<TileType>();
-            foreach (var newTileType in _availableTileTypes)
+            foreach (var newTileType in level.availableTileTypes)
                 if (newTileType != TileType.NONE && !_tilesTypes.Contains(newTileType)) // Shouldn't allow duplicates
                     _tilesTypes.Add(newTileType);
 
-            _board = CreateBoard(boardWidth, boardHeight, _tilesTypes);
+            _board = CreateBoard(level.boardWidth, level.boardHeight, _tilesTypes);
 
             // Progress
             progress = new Progress();
+            progress.SetLevel(level.level);
+            progress.SetGoal(level.goalScore);
+
 
             return _board;
         }
@@ -45,10 +53,10 @@ namespace match3.core
             )
         {
             // Specials
-            ClearLinesSpecial = new Special(clearLinesDurationSec, clearLinesWarmupSec);
-            ExplosionSpecial = new Special(explosionDurationSec, explosionWarmupSec);
-            ColorClearSpecial = new Special(colorClearDurationSec, colorClearWarmupSec);
-            TipSpecial = new Special(tipDurationSec, tipWarmupSec);
+            clearLinesSpecial = new Special(clearLinesDurationSec, clearLinesWarmupSec);
+            explosionSpecial = new Special(explosionDurationSec, explosionWarmupSec);
+            colorClearSpecial = new Special(colorClearDurationSec, colorClearWarmupSec);
+            tipSpecial = new Special(tipDurationSec, tipWarmupSec);
         }
 
         public bool IsValidMovement(int fromX, int fromY, int toX, int toY)
@@ -123,7 +131,7 @@ namespace match3.core
             newBoard[fromY][fromX] = newBoard[toY][toX];
             newBoard[toY][toX] = switchedTile;
 
-            int totalScore = 0;
+            int totalScore = progress.score;
             int loopCount = 0;
             List<BoardSequence> boardSequences = new List<BoardSequence>();
             List<List<bool>> matchedTiles;
@@ -138,13 +146,13 @@ namespace match3.core
                         if (matchedTiles[y][x])
                             matchedPosition.Add(new Vector2Int(x, y));
 
-                if (loopCount == 1 && ClearLinesSpecial.active)
+                if (loopCount == 1 && clearLinesSpecial.active)
                     SwapTileClearLinesSpecial(newBoard, matchedPosition);
 
-                if (loopCount == 1 && ExplosionSpecial.active)
+                if (loopCount == 1 && explosionSpecial.active)
                     SwapTileExplosionSpecial(newBoard, matchedPosition);
 
-                if (loopCount == 1 && ColorClearSpecial.active)
+                if (loopCount == 1 && colorClearSpecial.active)
                     SwapTileColorClearSpecial(newBoard, matchedPosition);
 
                 // Remove duplicated matches
@@ -226,7 +234,7 @@ namespace match3.core
                 boardSequences.Add(sequence);
             }
 
-            progress.AddScore(totalScore);
+            progress.SetScore(totalScore);
             _board = newBoard;
             return boardSequences;
         }
@@ -338,7 +346,7 @@ namespace match3.core
 
         public void SetSpecialClearLinesActive(bool active)
         {
-            ClearLinesSpecial.SetActive(active);
+            clearLinesSpecial.SetActive(active);
         }
 
         private void SwapTileClearLinesSpecial(Board newBoard, List<Vector2Int> matchedPosition)
@@ -370,7 +378,7 @@ namespace match3.core
 
         public void SetSpecialExplosionActive(bool active)
         {
-            ExplosionSpecial.SetActive(active);
+            explosionSpecial.SetActive(active);
         }
 
         private void SwapTileExplosionSpecial(Board newBoard, List<Vector2Int> matchedPosition)
@@ -396,7 +404,7 @@ namespace match3.core
 
         public void SetSpecialColorClearActive(bool active)
         {
-            ColorClearSpecial.SetActive(active);
+            colorClearSpecial.SetActive(active);
         }
 
         private void SwapTileColorClearSpecial(Board newBoard, List<Vector2Int> matchedPosition)
@@ -421,7 +429,7 @@ namespace match3.core
 
         public void SetSpecialTipActive(bool active)
         {
-            TipSpecial.SetActive(active);
+            tipSpecial.SetActive(active);
         }
     }
 }

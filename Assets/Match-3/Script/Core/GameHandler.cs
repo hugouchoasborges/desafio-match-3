@@ -17,23 +17,28 @@ namespace match3.core
         [SerializeField] private BoardView _boardView;
         [SerializeField] private ProgressView _progressView;
         [SerializeField] private SpecialView _specialView;
-        [SerializeField] private SpecialRepository _specialRepository;
         [SerializeField] private BoardOffsetView _boardOffsetView;
+        [SerializeField] private BoardContentFitter _boardContentFitter;
 
-        [Header("Board Settings")]
-        [SerializeField] private TileType[] _availableTileTypes;
-        [SerializeField][Range(2, 20)] private int _boardWidth = 10;
-        [SerializeField][Range(2, 20)] private int _boardHeight = 10;
+        [Header("Repositories")]
+        [SerializeField] private SpecialRepository _specialRepository;
+        [SerializeField] private LevelRepository _levelRepository;
+
+        [Header("levels")]
+        [SerializeField][Range(1, 100)] private int _startLevel = 1;
 
         // Internal animation\movement control
         private int _selectedX, _selectedY = -1;
         private bool _isAnimating;
 
+        private static int _currentLevel = -1;
+
         private void Start()
         {
+            _currentLevel = _startLevel - 2;
             _gameController = new GameController();
 
-            Board board = _gameController.StartGame(_availableTileTypes, _boardWidth, _boardHeight);
+            // Specials Settings
             _gameController.SetSpecials(
                 _specialRepository.clearLinesSpecial.durationSeconds, _specialRepository.clearLinesSpecial.warmupSeconds,
                 _specialRepository.explosionSpecial.durationSeconds, _specialRepository.explosionSpecial.warmupSeconds,
@@ -41,10 +46,6 @@ namespace match3.core
                 _specialRepository.tipSpecial.durationSeconds, _specialRepository.tipSpecial.warmupSeconds
                 );
 
-            _boardView.CreateBoard(board, OnTileClick);
-            _progressView.UpdateProgress(_gameController.progress);
-
-            // Specials
             _specialView.SetOnClickEvents(OnSpecialClearLinesClick, OnSpecialExplosionClick, OnSpecialColorClearClick, OnSpecialTipClick);
 
             _specialView.SetupClearLines(_specialRepository.clearLinesSpecial.name, _specialRepository.clearLinesSpecial.icon);
@@ -52,6 +53,18 @@ namespace match3.core
             _specialView.SetupColorClear(_specialRepository.colorClearSpecial.name, _specialRepository.colorClearSpecial.icon);
             _specialView.SetupTip(_specialRepository.tipSpecial.name, _specialRepository.tipSpecial.icon);
 
+            StartLevelNext();
+        }
+        private void StartLevelNext()
+        {
+            _currentLevel++;
+
+            Board board = _gameController.StartGame(_levelRepository[_currentLevel]);
+
+            _boardView.CreateBoard(board, OnTileClick);
+            _progressView.UpdateProgress(_gameController.progress);
+
+            _boardContentFitter.UpdateLayout();
             _boardOffsetView.AnimateTransitionDown();
         }
 
@@ -81,7 +94,7 @@ namespace match3.core
                         if (!isValid)
                         {
                             _boardView.SwapTiles(x, y, _selectedX, _selectedY)
-                            .onComplete += () => _isAnimating = false;
+                            .onComplete += OnBoardAnimationFinished;
                         }
                         else
                         {
@@ -89,7 +102,7 @@ namespace match3.core
                             List<BoardSequence> swapResult = _gameController.SwapTile(_selectedX, _selectedY, x, y);
 
                             // Then animate the new updated board 
-                            AnimateBoardSequences(swapResult, () => _isAnimating = false);
+                            AnimateBoardSequences(swapResult, OnBoardAnimationFinished);
                         }
 
                         _selectedX = -1;
@@ -105,6 +118,20 @@ namespace match3.core
                 _selectedY = y;
 
                 _boardView.SetTileSelected(_selectedX, _selectedY);
+            }
+        }
+
+        private void OnBoardAnimationFinished()
+        {
+            _isAnimating = false;
+
+            if (_gameController.progress.IsLevelFinished)
+            {
+                _boardOffsetView.AnimateTransitionUp(onComplete: () =>
+                {
+                    _boardView.DestroyBoard();
+                    StartLevelNext();
+                });
             }
         }
 
@@ -125,7 +152,7 @@ namespace match3.core
         {
             SetAllSpecialsInteractable(false);
             _gameController.SetSpecialClearLinesActive(true);
-            _specialView.AnimateClearLinesButton(_gameController.ClearLinesSpecial,
+            _specialView.AnimateClearLinesButton(_gameController.clearLinesSpecial,
                 onEffectFinishedCallback: () =>
                 {
                     _gameController.SetSpecialClearLinesActive(false);
@@ -143,7 +170,7 @@ namespace match3.core
         {
             SetAllSpecialsInteractable(false);
             _gameController.SetSpecialColorClearActive(true);
-            _specialView.AnimateColorClearButton(_gameController.ColorClearSpecial,
+            _specialView.AnimateColorClearButton(_gameController.colorClearSpecial,
                 onEffectFinishedCallback: () =>
                 {
                     _gameController.SetSpecialColorClearActive(false);
@@ -161,7 +188,7 @@ namespace match3.core
         {
             SetAllSpecialsInteractable(false);
             _gameController.SetSpecialExplosionActive(true);
-            _specialView.AnimateExplosionButton(_gameController.ExplosionSpecial,
+            _specialView.AnimateExplosionButton(_gameController.explosionSpecial,
                 onEffectFinishedCallback: () =>
                 {
                     _gameController.SetSpecialExplosionActive(false);
@@ -179,7 +206,7 @@ namespace match3.core
         {
             SetAllSpecialsInteractable(false);
             _gameController.SetSpecialTipActive(true);
-            _specialView.AnimateTipButton(_gameController.TipSpecial,
+            _specialView.AnimateTipButton(_gameController.tipSpecial,
                 onEffectFinishedCallback: () =>
                 {
                     _gameController.SetSpecialTipActive(false);

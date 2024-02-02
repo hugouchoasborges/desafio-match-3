@@ -47,14 +47,19 @@ namespace match3.board
         }
 
         [ContextMenu("Fit to Container")]
-        private void UpdateLayout()
+        public void UpdateLayout()
         {
             StopCoroutine(UpdateLayout_Coroutine());
             StartCoroutine(UpdateLayout_Coroutine());
         }
 
+        private WaitForSeconds _updateLayoutDelay = new WaitForSeconds(.2f);
         private IEnumerator UpdateLayout_Coroutine()
         {
+            // Needed so the Grid Layout can be computed
+
+            yield return _updateLayoutDelay;
+
             float cellSizeX = _defaultCellSize.x;
             float cellSizeY = _defaultCellSize.y;
 
@@ -66,8 +71,7 @@ namespace match3.board
 
             _layout.cellSize = new Vector2(cellSizeX, cellSizeY) * fitMultiplier * _axisSizePerc;
 
-            // Needed so the Grid Layout can be computed
-            yield return new WaitForEndOfFrame();
+            yield return _updateLayoutDelay;
 
             // Background adjustments
             if (_topLeftChild == null)

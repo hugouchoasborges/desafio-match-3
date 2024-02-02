@@ -51,7 +51,13 @@ namespace match3.tile
         {
             _destroyParticles?.Play();
             if (destroyGameobject)
-                DOVirtual.DelayedCall(1f, () => { Destroy(this.gameObject); });
+            {
+                DOVirtual.DelayedCall(1f, () =>
+                {
+                    if (this != null && this.gameObject != null)
+                        Destroy(this.gameObject);
+                });
+            }
         }
     }
 }

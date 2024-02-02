@@ -103,9 +103,21 @@ PrefabInstance:
       propertyPath: m_Color.r
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6461282553717085320, guid: 158286ddc87f92149bace4b9cdbc8a35, type: 3}
+      propertyPath: InitialModule.startColor.maxColor.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6461282553717085320, guid: 158286ddc87f92149bace4b9cdbc8a35, type: 3}
+      propertyPath: InitialModule.startColor.maxColor.g
+      value: 0.025779486
+      objectReference: {fileID: 0}
+    - target: {fileID: 6461282553717085320, guid: 158286ddc87f92149bace4b9cdbc8a35, type: 3}
+      propertyPath: InitialModule.startColor.maxColor.r
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8131021523737363015, guid: 158286ddc87f92149bace4b9cdbc8a35, type: 3}
       propertyPath: m_Name
-      value: Tile Blue
+      value: Tile Blue Variant
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 158286ddc87f92149bace4b9cdbc8a35, type: 3}

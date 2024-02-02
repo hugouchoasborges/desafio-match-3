@@ -31,7 +31,7 @@ namespace match3.board
         [Range(0, 1)]
         private float _axisSizePerc = 1f;
 
-        private Transform _topLeftChild;
+        private RectTransform _topLeftChild;
 
         void Start()
         {
@@ -47,14 +47,19 @@ namespace match3.board
         }
 
         [ContextMenu("Fit to Container")]
-        private void UpdateLayout()
+        public void UpdateLayout()
         {
             StopCoroutine(UpdateLayout_Coroutine());
             StartCoroutine(UpdateLayout_Coroutine());
         }
 
+        private WaitForSeconds _updateLayoutDelay = new WaitForSeconds(.2f);
         private IEnumerator UpdateLayout_Coroutine()
         {
+            // Needed so the Grid Layout can be computed
+
+            yield return _updateLayoutDelay;
+
             float cellSizeX = _defaultCellSize.x;
             float cellSizeY = _defaultCellSize.y;
 
@@ -66,17 +71,16 @@ namespace match3.board
 
             _layout.cellSize = new Vector2(cellSizeX, cellSizeY) * fitMultiplier * _axisSizePerc;
 
-            // Needed so the Grid Layout can be computed
-            yield return new WaitForEndOfFrame();
+            yield return _updateLayoutDelay;
 
             // Background adjustments
             if (_topLeftChild == null)
-                _topLeftChild = _layout.gameObject.transform.GetChild(1);
+                _topLeftChild = _layout.gameObject.transform.GetChild(1) as RectTransform;
 
             _backgroundContainer.sizeDelta = new Vector2(_layout.minWidth, _layout.minHeight);
-            _backgroundContainer.position = new Vector2(
-                _topLeftChild.position.x - (_layout.cellSize.x / 2),
-                _topLeftChild.position.y + (_layout.cellSize.y / 2)
+            _backgroundContainer.anchoredPosition = new Vector2(
+                _topLeftChild.anchoredPosition.x - (_layout.cellSize.x / 2),
+                _topLeftChild.anchoredPosition.y + (_layout.cellSize.y / 2)
                 );
 
             if (Application.isPlaying)

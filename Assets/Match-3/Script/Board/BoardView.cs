@@ -16,6 +16,7 @@ namespace match3.board
 
         private TileSpotView[][] _tileSpots;
         private TileView[][] _tiles;
+        private TileView _selectedTile;
 
         private Action<int, int> _onTileClickCallback;
 
@@ -92,6 +93,45 @@ namespace match3.board
         // ----------------------------------------------------------------------------------
 
 
+        // ========================== Select ============================
+
+        public void SetTileSelected(int x, int y)
+        {
+            if (x < 0 || y < 0)
+            {
+                if (_selectedTile != null)
+                {
+                    _selectedTile.SetSelected(false);
+                    _selectedTile = null;
+
+                    // Unselect all tiles tips
+                    SetAllTilesSelectedTip(false);
+                    return;
+                }
+            }
+
+            _selectedTile = _tiles[y][x];
+            _selectedTile.SetSelected(true);
+        }
+
+        private void SetAllTilesSelectedTip(bool selected)
+        {
+            for (int y = 0; y < _tiles.Length; y++)
+            {
+                for (int x = 0; x < _tiles[y].Length; x++)
+                {
+                    SetTileSelectedTip(x, y, selected);
+                }
+            }
+        }
+
+        public void SetTileSelectedTip(int x, int y, bool selected)
+        {
+            if (x < 0 || y < 0) return;
+
+            _tiles[y][x].SetSelectedTip(selected);
+        }
+
         // ========================== Swap ============================
 
         public Tween SwapTiles(int fromX, int fromY, int toX, int toY)
@@ -111,14 +151,22 @@ namespace match3.board
 
         public Tween DestroyTiles(List<Vector2Int> matchedPosition)
         {
+            Sequence seq = DOTween.Sequence();
             for (int i = 0; i < matchedPosition.Count; i++)
             {
-                Vector2Int position = matchedPosition[i];
                 // TODO: Queue this to a pool
-                Destroy(_tiles[position.y][position.x].gameObject);
+                Vector2Int position = matchedPosition[i];
+                TileView tile = _tiles[position.y][position.x];
                 _tiles[position.y][position.x] = null;
+
+                seq.Join(tile.transform.DOScale(0f, 0.2f)).onComplete += () =>
+                {
+                    tile.PlayDestroyParticles(true);
+                    //Destroy(tile.gameObject);
+                };
             }
-            return DOVirtual.DelayedCall(0.2f, () => { });
+
+            return seq;
         }
 
         // ========================== Move ============================

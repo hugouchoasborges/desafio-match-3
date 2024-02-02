@@ -1,12 +1,13 @@
 using DG.Tweening;
 using match3.board;
+using match3.missions;
 using match3.progress;
 using match3.settings;
 using match3.special;
-using match3.tile;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace match3.core
 {
@@ -17,37 +18,77 @@ namespace match3.core
         [SerializeField] private BoardView _boardView;
         [SerializeField] private ProgressView _progressView;
         [SerializeField] private SpecialView _specialView;
-        [SerializeField] private SpecialRepository _specialRepository;
+        [SerializeField] private BoardOffsetView _boardOffsetView;
+        [SerializeField] private BoardContentFitter _boardContentFitter;
 
-        [Header("Board Settings")]
-        [SerializeField] private TileType[] _availableTileTypes;
-        [SerializeField][Range(2, 20)] private int _boardWidth = 10;
-        [SerializeField][Range(2, 20)] private int _boardHeight = 10;
+        [Header("Repositories")]
+        [SerializeField] private SpecialRepository _specialRepository;
+        [SerializeField] private LevelRepository _levelRepository;
+
+        [Header("levels")]
+        [SerializeField][Range(1, 100)] private int _startLevel = 1;
+
+        [Header("GameOver")]
+        [SerializeField] private GameObject _gameoverPanel;
+        [SerializeField] private GameObject _blockTouchesPanel;
+        [SerializeField] private Button _replayButton;
+
+        [Header("Missions")]
+        [SerializeField][Range(1, 5)] private int _missionLifes = 3;
+        [SerializeField] private MissionsView _missionsView;
 
         // Internal animation\movement control
         private int _selectedX, _selectedY = -1;
         private bool _isAnimating;
 
+        private static int _currentLevel = -1;
+
         private void Start()
         {
             _gameController = new GameController();
 
-            Board board = _gameController.StartGame(_availableTileTypes, _boardWidth, _boardHeight);
+            // Specials Settings
             _gameController.SetSpecials(
                 _specialRepository.clearLinesSpecial.durationSeconds, _specialRepository.clearLinesSpecial.warmupSeconds,
                 _specialRepository.explosionSpecial.durationSeconds, _specialRepository.explosionSpecial.warmupSeconds,
-                _specialRepository.colorClearSpecial.durationSeconds, _specialRepository.colorClearSpecial.warmupSeconds
+                _specialRepository.colorClearSpecial.durationSeconds, _specialRepository.colorClearSpecial.warmupSeconds,
+                _specialRepository.tipSpecial.durationSeconds, _specialRepository.tipSpecial.warmupSeconds
                 );
 
-            _boardView.CreateBoard(board, OnTileClick);
-            _progressView.UpdateProgress(_gameController.progress);
-
-            // Specials
-            _specialView.SetOnClickEvents(OnSpecialClearLinesClick, OnSpecialExplosionClick, OnSpecialColorClearClick);
+            _specialView.SetOnClickEvents(OnSpecialClearLinesClick, OnSpecialExplosionClick, OnSpecialColorClearClick, OnSpecialTipClick);
 
             _specialView.SetupClearLines(_specialRepository.clearLinesSpecial.name, _specialRepository.clearLinesSpecial.icon);
             _specialView.SetupExplosion(_specialRepository.explosionSpecial.name, _specialRepository.explosionSpecial.icon);
             _specialView.SetupColorClear(_specialRepository.colorClearSpecial.name, _specialRepository.colorClearSpecial.icon);
+            _specialView.SetupTip(_specialRepository.tipSpecial.name, _specialRepository.tipSpecial.icon);
+
+            _replayButton.onClick.AddListener(OnReplayClick);
+
+            StartFirstLevel();
+        }
+
+        private void StartFirstLevel()
+        {
+            _currentLevel = _startLevel - 2;
+            StartNextLevel();
+        }
+
+        private void StartNextLevel()
+        {
+            _currentLevel++;
+
+            Board board = _gameController.StartGame(_levelRepository[_currentLevel], _missionLifes);
+
+            _boardView.CreateBoard(board, OnTileClick);
+            _progressView.UpdateProgress(_gameController.progress);
+
+            _boardContentFitter.UpdateLayout();
+            _boardOffsetView.AnimateTransitionDown();
+
+            _missionsView.Setup(_gameController.missions);
+
+            if (CheckForGameOver())
+                GameOver();
         }
 
         // ========================== Tile Click ============================
@@ -62,6 +103,8 @@ namespace match3.core
                 {
                     _selectedX = -1;
                     _selectedY = -1;
+
+                    _boardView.SetTileSelected(_selectedX, _selectedY);
                 }
                 else
                 {
@@ -73,8 +116,9 @@ namespace match3.core
                         bool isValid = _gameController.IsValidMovement(_selectedX, _selectedY, x, y);
                         if (!isValid)
                         {
+                            _gameController.ConsumeMissionLife();
                             _boardView.SwapTiles(x, y, _selectedX, _selectedY)
-                            .onComplete += () => _isAnimating = false;
+                            .onComplete += OnBoardAnimationFinished;
                         }
                         else
                         {
@@ -82,11 +126,13 @@ namespace match3.core
                             List<BoardSequence> swapResult = _gameController.SwapTile(_selectedX, _selectedY, x, y);
 
                             // Then animate the new updated board 
-                            AnimateBoardSequences(swapResult, () => _isAnimating = false);
+                            AnimateBoardSequences(swapResult, OnBoardAnimationFinished);
                         }
 
                         _selectedX = -1;
                         _selectedY = -1;
+
+                        _boardView.SetTileSelected(_selectedX, _selectedY);
                     };
                 }
             }
@@ -94,7 +140,28 @@ namespace match3.core
             {
                 _selectedX = x;
                 _selectedY = y;
+
+                _boardView.SetTileSelected(_selectedX, _selectedY);
             }
+        }
+
+        private void OnBoardAnimationFinished()
+        {
+            _isAnimating = false;
+
+            if (_gameController.progress.IsLevelFinished)
+            {
+                _boardOffsetView.AnimateTransitionUp(onComplete: () =>
+                {
+                    _boardView.DestroyBoard();
+                    StartNextLevel();
+                });
+            }
+
+            _missionsView.UpdateView(_gameController.missions);
+
+            if (CheckForGameOver())
+                GameOver();
         }
 
 
@@ -114,7 +181,7 @@ namespace match3.core
         {
             SetAllSpecialsInteractable(false);
             _gameController.SetSpecialClearLinesActive(true);
-            _specialView.AnimateClearLinesButton(_gameController.ClearLinesSpecial,
+            _specialView.AnimateClearLinesButton(_gameController.clearLinesSpecial,
                 onEffectFinishedCallback: () =>
                 {
                     _gameController.SetSpecialClearLinesActive(false);
@@ -132,7 +199,7 @@ namespace match3.core
         {
             SetAllSpecialsInteractable(false);
             _gameController.SetSpecialColorClearActive(true);
-            _specialView.AnimateColorClearButton(_gameController.ColorClearSpecial,
+            _specialView.AnimateColorClearButton(_gameController.colorClearSpecial,
                 onEffectFinishedCallback: () =>
                 {
                     _gameController.SetSpecialColorClearActive(false);
@@ -150,7 +217,7 @@ namespace match3.core
         {
             SetAllSpecialsInteractable(false);
             _gameController.SetSpecialExplosionActive(true);
-            _specialView.AnimateExplosionButton(_gameController.ExplosionSpecial,
+            _specialView.AnimateExplosionButton(_gameController.explosionSpecial,
                 onEffectFinishedCallback: () =>
                 {
                     _gameController.SetSpecialExplosionActive(false);
@@ -162,6 +229,30 @@ namespace match3.core
                         SetAllSpecialsInteractable(true);
                 }
                 );
+        }
+
+        private void OnSpecialTipClick()
+        {
+            SetAllSpecialsInteractable(false);
+            _gameController.SetSpecialTipActive(true);
+            _specialView.AnimateTipButton(_gameController.tipSpecial,
+                onEffectFinishedCallback: () =>
+                {
+                    _gameController.SetSpecialTipActive(false);
+                    SetAllSpecialsInteractable(true);
+                },
+                onWarmupFinishedCallback: () =>
+                {
+                    if (!IsAnySpecialActive())
+                        SetAllSpecialsInteractable(true);
+                }
+                );
+
+            List<Vector2Int> foundMatches = _gameController.GetMatchTipsBruteForce();
+            foreach (Vector2Int match in foundMatches)
+            {
+                _boardView.SetTileSelectedTip(match.x, match.y, true);
+            }
         }
 
 
@@ -203,6 +294,31 @@ namespace match3.core
             sequence.Append(_boardView.CreateTile(boardSequence.addedTiles));
 
             return sequence;
+        }
+
+
+        // ========================== Game Over ============================
+
+        private bool CheckForGameOver()
+        {
+            return _gameController.GetMatchTipsBruteForce().Count == 0 || _gameController.missions.isGameOver;
+        }
+
+        private void GameOver()
+        {
+            _gameoverPanel.SetActive(true);
+            _blockTouchesPanel.SetActive(true);
+        }
+
+        private void OnReplayClick()
+        {
+            _gameoverPanel.SetActive(false);
+            _blockTouchesPanel.SetActive(false);
+            _boardOffsetView.AnimateTransitionUp(onComplete: () =>
+            {
+                _boardView.DestroyBoard();
+                StartFirstLevel();
+            });
         }
     }
 }

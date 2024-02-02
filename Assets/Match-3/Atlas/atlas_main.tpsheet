@@ -1,0 +1,24 @@
+#
+# Sprite sheet data for Unity.
+#
+# To import these sprites into your Unity project, download "TexturePackerImporter":
+# https://www.codeandweb.com/texturepacker/unity
+#
+# $TexturePacker:SmartUpdate:8296b4a90d5a7381ed8eae334ed057a7:93bc981f6ea751b539e12bdba8264b76:fdecc4925ee70ae57ffe55c09b8c285c$
+#
+:format=40300
+:texture=atlas_main.png
+:size=256x512
+:pivotpoints=enabled
+:borders=enabled
+:alphahandling=ClearTransparentPixels
+
+backgroundColor;1;191;150;150; 0.5;0.5; 0;0;0;0; 4;150;0;0;0;0;150;150;150; 2;1;2;3;0;1;3
+hud_heartEmpty;153;164;53;45; 0.5;0.5; 0;0;0;0; 4;53;0;0;0;0;45;53;45; 2;1;2;3;0;1;3
+hud_heartFull;1;144;53;45; 0.5;0.5; 0;0;0;0; 4;53;0;0;0;0;45;53;45; 2;1;2;3;0;1;3
+nebula;1;343;241;168; 0.5;0.5; 0;0;0;0; 12;197;154;241;110;241;73;200;30;159;0;98;0;60;19;0;63;0;108;67;165;77;168;105;168; 10;9;10;11;6;9;11;8;6;7;8;9;6;5;6;11;4;5;11;3;4;11;3;0;1;3;1;2;0;3;11
+speedLine;244;312;7;186; 0.5;0.5; 0;0;0;0; 4;7;0;0;0;0;186;7;186; 2;1;2;3;0;1;3
+starBig;219;320;23;21; 0.5;0.5; 0;0;0;0; 4;23;0;0;0;0;21;23;21; 2;1;2;3;0;1;3
+starSmall;244;500;11;11; 0.5;0.5; 0;0;0;0; 4;11;0;0;0;0;11;11;11; 2;1;2;3;0;1;3
+tile_9slice;153;277;64;64; 0.5;0.5; 21;21;21;21
+tile_9slice_filled;153;211;64;64; 0.5;0.5; 21;21;21;21

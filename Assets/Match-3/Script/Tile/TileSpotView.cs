@@ -38,7 +38,7 @@ namespace match3.tile
 
         public Tween AnimatedSetTile(TileView tile)
         {
-            tile.SetParent(transform);
+            tile.SetParent(transform, true);
             return tile.DOMove(transform.position, 0.3f);
         }
 

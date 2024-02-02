@@ -10,32 +10,38 @@ namespace match3.special
         [SerializeField] private SpecialButtonView _clearLinesButton;
         [SerializeField] private SpecialButtonView _explosionButton;
         [SerializeField] private SpecialButtonView _colorClearButton;
+        [SerializeField] private SpecialButtonView _tipButton;
 
         private List<SpecialButtonView> _allButtons = new List<SpecialButtonView>();
 
         private Action _onClearLinesCallback;
         private Action _onExplosionCallback;
         private Action _onColorClearCallback;
+        private Action _onTipCallback;
 
         private void Start()
         {
             _clearLinesButton.AddOnClickListener(OnClearLinesTriggered);
             _explosionButton.AddOnClickListener(OnExplosionTriggered);
             _colorClearButton.AddOnClickListener(OnColorClearTriggered);
+            _tipButton.AddOnClickListener(OnTipTriggered);
 
             _allButtons.Add(_clearLinesButton);
             _allButtons.Add(_explosionButton);
             _allButtons.Add(_colorClearButton);
+            _allButtons.Add(_tipButton);
         }
 
         public void SetOnClickEvents(
             Action OnClearLinesCallback,
             Action OnExplosionCallback,
-            Action OnColorClearCallback)
+            Action OnColorClearCallback,
+            Action OnTipCallback)
         {
             _onClearLinesCallback = OnClearLinesCallback;
             _onExplosionCallback = OnExplosionCallback;
             _onColorClearCallback = OnColorClearCallback;
+            _onTipCallback = OnTipCallback;
         }
 
         private void OnClearLinesTriggered()
@@ -51,6 +57,11 @@ namespace match3.special
         private void OnColorClearTriggered()
         {
             _onColorClearCallback?.Invoke();
+        }
+
+        private void OnTipTriggered()
+        {
+            _onTipCallback?.Invoke();
         }
 
 
@@ -81,6 +92,11 @@ namespace match3.special
             Action onWarmupFinishedCallback = null)
             => AnimateButton(_colorClearButton, special, onEffectFinishedCallback, onWarmupFinishedCallback);
 
+        public void AnimateTipButton(Special special,
+            Action onEffectFinishedCallback = null,
+            Action onWarmupFinishedCallback = null)
+            => AnimateButton(_tipButton, special, onEffectFinishedCallback, onWarmupFinishedCallback);
+
         // ========================== Setters ============================
 
         private void SetupButton(SpecialButtonView button, string name, Sprite icon)
@@ -91,6 +107,7 @@ namespace match3.special
         public void SetupClearLines(string name, Sprite icon) => SetupButton(_clearLinesButton, name, icon);
         public void SetupExplosion(string name, Sprite icon) => SetupButton(_explosionButton, name, icon);
         public void SetupColorClear(string name, Sprite icon) => SetupButton(_colorClearButton, name, icon);
+        public void SetupTip(string name, Sprite icon) => SetupButton(_tipButton, name, icon);
 
 
         public void SetAllSpecialsInteractable(bool interactable, bool affectAnimating = false)

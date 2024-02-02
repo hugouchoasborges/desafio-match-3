@@ -10,11 +10,6 @@ namespace match3.missions
 
         private List<HeartView> _hearts;
 
-        private void Start()
-        {
-            _hearts = new List<HeartView>();
-        }
-
         private void DestroyHearts()
         {
             for (int i = _hearts.Count - 1; i >= 0; i--)
@@ -27,6 +22,9 @@ namespace match3.missions
 
         public void Setup(Missions missions)
         {
+            if(_hearts == null)
+                _hearts = new List<HeartView>();
+
             if (_hearts.Count > 0)
                 DestroyHearts();
 

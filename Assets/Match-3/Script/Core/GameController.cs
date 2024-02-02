@@ -1,4 +1,5 @@
 using match3.board;
+using match3.missions;
 using match3.progress;
 using match3.settings;
 using match3.special;
@@ -21,11 +22,12 @@ namespace match3.core
         public Special tipSpecial { get; private set; }
 
         public Level currentLevel { get; private set; }
+        public Missions missions { get; private set; }
 
         private List<TileType> _tilesTypes;
         private int _tileCount;
 
-        public Board StartGame(Level level)
+        public Board StartGame(Level level, int lifes)
         {
             currentLevel = level;
 
@@ -41,6 +43,8 @@ namespace match3.core
             progress.SetLevel(level.level);
             progress.SetGoal(level.goalScore);
 
+            // Missions
+            missions = new Missions(lifes);
 
             return _board;
         }
@@ -337,6 +341,12 @@ namespace match3.core
         }
 
 
+        // ========================== Missions ============================
+
+        public void ConsumeMissionLife()
+        {
+            missions.ConsumeLife();
+        }
 
         // ----------------------------------------------------------------------------------
         // ========================== Specials ============================

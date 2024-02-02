@@ -1,5 +1,6 @@
 using DG.Tweening;
 using match3.board;
+using match3.missions;
 using match3.progress;
 using match3.settings;
 using match3.special;
@@ -29,7 +30,12 @@ namespace match3.core
 
         [Header("GameOver")]
         [SerializeField] private GameObject _gameoverPanel;
+        [SerializeField] private GameObject _blockTouchesPanel;
         [SerializeField] private Button _replayButton;
+
+        [Header("Missions")]
+        [SerializeField][Range(1, 5)] private int _missionLifes = 3;
+        [SerializeField] private MissionsView _missionsView;
 
         // Internal animation\movement control
         private int _selectedX, _selectedY = -1;
@@ -71,13 +77,15 @@ namespace match3.core
         {
             _currentLevel++;
 
-            Board board = _gameController.StartGame(_levelRepository[_currentLevel]);
+            Board board = _gameController.StartGame(_levelRepository[_currentLevel], _missionLifes);
 
             _boardView.CreateBoard(board, OnTileClick);
             _progressView.UpdateProgress(_gameController.progress);
 
             _boardContentFitter.UpdateLayout();
             _boardOffsetView.AnimateTransitionDown();
+
+            _missionsView.Setup(_gameController.missions);
 
             if (CheckForGameOver())
                 GameOver();
@@ -108,6 +116,7 @@ namespace match3.core
                         bool isValid = _gameController.IsValidMovement(_selectedX, _selectedY, x, y);
                         if (!isValid)
                         {
+                            _gameController.ConsumeMissionLife();
                             _boardView.SwapTiles(x, y, _selectedX, _selectedY)
                             .onComplete += OnBoardAnimationFinished;
                         }
@@ -148,6 +157,8 @@ namespace match3.core
                     StartNextLevel();
                 });
             }
+
+            _missionsView.UpdateView(_gameController.missions);
 
             if (CheckForGameOver())
                 GameOver();
@@ -290,17 +301,19 @@ namespace match3.core
 
         private bool CheckForGameOver()
         {
-            return _gameController.GetMatchTipsBruteForce().Count == 0;
+            return _gameController.GetMatchTipsBruteForce().Count == 0 || _gameController.missions.isGameOver;
         }
 
         private void GameOver()
         {
             _gameoverPanel.SetActive(true);
+            _blockTouchesPanel.SetActive(true);
         }
 
         private void OnReplayClick()
         {
             _gameoverPanel.SetActive(false);
+            _blockTouchesPanel.SetActive(false);
             _boardOffsetView.AnimateTransitionUp(onComplete: () =>
             {
                 _boardView.DestroyBoard();

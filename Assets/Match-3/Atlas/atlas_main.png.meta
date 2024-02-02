@@ -23,6 +23,12 @@ TextureImporter:
   - first:
       213: -2744175107924006752
     second: starSmall
+  - first:
+      213: 7682105122021202729
+    second: hud_heartEmpty
+  - first:
+      213: -3432194528393575982
+    second: hud_heartFull
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -116,6 +122,48 @@ TextureImporter:
       bones: []
       spriteID: 0a33b0051f404fb10800000000000000
       internalID: 2014240367817995168
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hud_heartEmpty
+      rect:
+        serializedVersion: 2
+        x: 153
+        y: 164
+        width: 53
+        height: 45
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 92b584d28e15c9a60800000000000000
+      internalID: 7682105122021202729
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hud_heartFull
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 144
+        width: 53
+        height: 45
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d1cf0fc2456e50d0800000000000000
+      internalID: -3432194528393575982
       vertices: []
       indices: 
       edges: []

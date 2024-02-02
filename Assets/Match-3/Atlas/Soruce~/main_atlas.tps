@@ -260,6 +260,22 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">hearts/hud_heartEmpty.png</key>
+            <key type="filename">hearts/hud_heartFull.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>13,11,27,23</rect>
+                <key>scale9Paddings</key>
+                <rect>13,11,27,23</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">main/tile_9slice.PNG</key>
             <key type="filename">main/tile_9slice_filled.PNG</key>
             <struct type="IndividualSpriteSettings">
@@ -281,6 +297,7 @@
         <array>
             <filename>main</filename>
             <filename>background</filename>
+            <filename>hearts</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

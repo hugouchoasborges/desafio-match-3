@@ -24,6 +24,11 @@ namespace match3.tile
             _selectionIcon.enabled = selected;
         }
 
+        public void SetSelectedTip(bool selected)
+        {
+            _selectionIcon.enabled = selected;
+        }
+
         /// <summary>
         /// Stops all running transform tweening operations then 
         /// moves to the corresponding location and duration

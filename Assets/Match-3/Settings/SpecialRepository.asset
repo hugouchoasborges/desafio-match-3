@@ -27,3 +27,8 @@ MonoBehaviour:
     _name: Clear Color
     _warmupSeconds: 25
     _durationSeconds: 5
+  _tipSpecial:
+    _icon: {fileID: 0}
+    _name: Tip
+    _warmupSeconds: 10
+    _durationSeconds: 1

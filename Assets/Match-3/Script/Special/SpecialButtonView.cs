@@ -55,6 +55,7 @@ namespace match3.special
         {
             _text.text = name;
             if (icon != null) _image.sprite = icon;
+            _text.enabled = icon == null;
             _defaultColor = _background.color;
         }
 

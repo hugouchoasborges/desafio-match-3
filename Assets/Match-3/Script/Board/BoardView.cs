@@ -103,12 +103,33 @@ namespace match3.board
                 {
                     _selectedTile.SetSelected(false);
                     _selectedTile = null;
+
+                    // Unselect all tiles tips
+                    SetAllTilesSelectedTip(false);
                     return;
                 }
             }
 
             _selectedTile = _tiles[y][x];
             _selectedTile.SetSelected(true);
+        }
+
+        private void SetAllTilesSelectedTip(bool selected)
+        {
+            for (int y = 0; y < _tiles.Length; y++)
+            {
+                for (int x = 0; x < _tiles[y].Length; x++)
+                {
+                    SetTileSelectedTip(x, y, selected);
+                }
+            }
+        }
+
+        public void SetTileSelectedTip(int x, int y, bool selected)
+        {
+            if (x < 0 || y < 0) return;
+
+            _tiles[y][x].SetSelected(selected);
         }
 
         // ========================== Swap ============================

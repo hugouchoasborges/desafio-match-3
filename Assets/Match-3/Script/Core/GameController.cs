@@ -4,7 +4,6 @@ using match3.special;
 using match3.tile;
 using System.Collections.Generic;
 using UnityEngine;
-
 using Random = UnityEngine.Random;
 
 namespace match3.core
@@ -18,6 +17,7 @@ namespace match3.core
         public Special ClearLinesSpecial { get; private set; }
         public Special ExplosionSpecial { get; private set; }
         public Special ColorClearSpecial { get; private set; }
+        public Special TipSpecial { get; private set; }
 
         private List<TileType> _tilesTypes;
         private int _tileCount;
@@ -40,13 +40,15 @@ namespace match3.core
         public void SetSpecials(
             int clearLinesDurationSec, int clearLinesWarmupSec,
             int explosionDurationSec, int explosionWarmupSec,
-            int colorClearDurationSec, int colorClearWarmupSec
+            int colorClearDurationSec, int colorClearWarmupSec,
+            int tipDurationSec, int tipWarmupSec
             )
         {
             // Specials
             ClearLinesSpecial = new Special(clearLinesDurationSec, clearLinesWarmupSec);
             ExplosionSpecial = new Special(explosionDurationSec, explosionWarmupSec);
             ColorClearSpecial = new Special(colorClearDurationSec, colorClearWarmupSec);
+            TipSpecial = new Special(tipDurationSec, tipWarmupSec);
         }
 
         public bool IsValidMovement(int fromX, int fromY, int toX, int toY)
@@ -77,6 +79,40 @@ namespace match3.core
                 }
             }
             return false;
+        }
+
+        /// <summary>
+        /// Finds all possible 1-away matches
+        /// </summary>
+        /// <returns>A list of positions that are 1-away from a match </returns>
+        public List<Vector2Int> GetMatchTipsBruteForce() => GetMatchTipsBruteForce(_board);
+        private List<Vector2Int> GetMatchTipsBruteForce(Board board)
+        {
+            // TODO: Optimize this
+            List<Vector2Int> matchedTipPositions = new List<Vector2Int>();
+
+            for (int y = 0; y < board.lines; y++)
+            {
+                for (int x = 0; x < board.columns; x++)
+                {
+                    Vector2Int[] neighbors = board.GetNeighborTilePositions(x, y);
+                    foreach (Vector2Int neighbor in neighbors)
+                    {
+                        Board newBoard = board.Clone();
+
+                        Tile switchedTile = newBoard[y][x];
+                        newBoard[y][x] = newBoard[neighbor.y][neighbor.x];
+                        newBoard[neighbor.y][neighbor.x] = switchedTile;
+
+                        if (newBoard.IsMatch(x, y))
+                        {
+                            matchedTipPositions.Add(new Vector2Int(x, y));
+                        }
+                    }
+                }
+            }
+
+            return matchedTipPositions;
         }
 
         public List<BoardSequence> SwapTile(int fromX, int fromY, int toX, int toY)
@@ -133,10 +169,10 @@ namespace match3.core
                         // Mark empty slots as free\available
                         if (newBoard[y][x].type == TileType.NONE)
                         {
-                            if(!availableSlots.Contains(y))
+                            if (!availableSlots.Contains(y))
                                 availableSlots.Enqueue(y);
                         }
-                        else if(availableSlots.Count > 0)
+                        else if (availableSlots.Count > 0)
                         {
                             // If there are free slots, move the current tile to the bottom
                             Tile movedTile = newBoard[y][x];
@@ -236,17 +272,13 @@ namespace match3.core
             {
                 for (int x = 0; x < board.columns; x++)
                 {
-                    if (x > 1
-                        && board[y][x].type == board[y][x - 1].type
-                        && board[y][x - 1].type == board[y][x - 2].type)
+                    if (board.IsHorizontalRightMatch(x, y))
                     {
                         matchedTiles[y][x] = true;
                         matchedTiles[y][x - 1] = true;
                         matchedTiles[y][x - 2] = true;
                     }
-                    if (y > 1
-                        && board[y][x].type == board[y - 1][x].type
-                        && board[y - 1][x].type == board[y - 2][x].type)
+                    if (board.IsVerticalBottomMatch(x, y))
                     {
                         matchedTiles[y][x] = true;
                         matchedTiles[y - 1][x] = true;
@@ -382,6 +414,14 @@ namespace match3.core
                 for (int x = 0; x < newBoard.columns; x++)
                     if (tileTypesToClear.Contains(newBoard[y][x].type))
                         matchedPosition.Add(new Vector2Int(x, y));
+        }
+
+
+        // ========================== Tip ============================
+
+        public void SetSpecialTipActive(bool active)
+        {
+            TipSpecial.SetActive(active);
         }
     }
 }

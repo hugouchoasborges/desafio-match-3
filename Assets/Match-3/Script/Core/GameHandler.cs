@@ -37,18 +37,20 @@ namespace match3.core
             _gameController.SetSpecials(
                 _specialRepository.clearLinesSpecial.durationSeconds, _specialRepository.clearLinesSpecial.warmupSeconds,
                 _specialRepository.explosionSpecial.durationSeconds, _specialRepository.explosionSpecial.warmupSeconds,
-                _specialRepository.colorClearSpecial.durationSeconds, _specialRepository.colorClearSpecial.warmupSeconds
+                _specialRepository.colorClearSpecial.durationSeconds, _specialRepository.colorClearSpecial.warmupSeconds,
+                _specialRepository.tipSpecial.durationSeconds, _specialRepository.tipSpecial.warmupSeconds
                 );
 
             _boardView.CreateBoard(board, OnTileClick);
             _progressView.UpdateProgress(_gameController.progress);
 
             // Specials
-            _specialView.SetOnClickEvents(OnSpecialClearLinesClick, OnSpecialExplosionClick, OnSpecialColorClearClick);
+            _specialView.SetOnClickEvents(OnSpecialClearLinesClick, OnSpecialExplosionClick, OnSpecialColorClearClick, OnSpecialTipClick);
 
             _specialView.SetupClearLines(_specialRepository.clearLinesSpecial.name, _specialRepository.clearLinesSpecial.icon);
             _specialView.SetupExplosion(_specialRepository.explosionSpecial.name, _specialRepository.explosionSpecial.icon);
             _specialView.SetupColorClear(_specialRepository.colorClearSpecial.name, _specialRepository.colorClearSpecial.icon);
+            _specialView.SetupTip(_specialRepository.tipSpecial.name, _specialRepository.tipSpecial.icon);
 
             _boardOffsetView.AnimateTransitionDown();
         }
@@ -171,6 +173,30 @@ namespace match3.core
                         SetAllSpecialsInteractable(true);
                 }
                 );
+        }
+
+        private void OnSpecialTipClick()
+        {
+            SetAllSpecialsInteractable(false);
+            _gameController.SetSpecialTipActive(true);
+            _specialView.AnimateTipButton(_gameController.TipSpecial,
+                onEffectFinishedCallback: () =>
+                {
+                    _gameController.SetSpecialTipActive(false);
+                    SetAllSpecialsInteractable(true);
+                },
+                onWarmupFinishedCallback: () =>
+                {
+                    if (!IsAnySpecialActive())
+                        SetAllSpecialsInteractable(true);
+                }
+                );
+
+            List<Vector2Int> foundMatches = _gameController.GetMatchTipsBruteForce();
+            foreach (Vector2Int match in foundMatches)
+            {
+                _boardView.SetTileSelectedTip(match.x, match.y, true);
+            }
         }
 
 

@@ -6,7 +6,7 @@
         public int warmupSeconds { get; private set; }
         public int durationSeconds { get; private set; }
 
-        public Special(int warmupSeconds, int durationSeconds)
+        public Special(int durationSeconds, int warmupSeconds)
         {
             this.warmupSeconds = warmupSeconds;
             this.durationSeconds = durationSeconds;

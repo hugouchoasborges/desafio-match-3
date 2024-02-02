@@ -3,10 +3,10 @@ using match3.board;
 using match3.progress;
 using match3.settings;
 using match3.special;
-using match3.tile;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace match3.core
 {
@@ -27,6 +27,10 @@ namespace match3.core
         [Header("levels")]
         [SerializeField][Range(1, 100)] private int _startLevel = 1;
 
+        [Header("GameOver")]
+        [SerializeField] private GameObject _gameoverPanel;
+        [SerializeField] private Button _replayButton;
+
         // Internal animation\movement control
         private int _selectedX, _selectedY = -1;
         private bool _isAnimating;
@@ -35,7 +39,6 @@ namespace match3.core
 
         private void Start()
         {
-            _currentLevel = _startLevel - 2;
             _gameController = new GameController();
 
             // Specials Settings
@@ -53,9 +56,18 @@ namespace match3.core
             _specialView.SetupColorClear(_specialRepository.colorClearSpecial.name, _specialRepository.colorClearSpecial.icon);
             _specialView.SetupTip(_specialRepository.tipSpecial.name, _specialRepository.tipSpecial.icon);
 
-            StartLevelNext();
+            _replayButton.onClick.AddListener(OnReplayClick);
+
+            StartFirstLevel();
         }
-        private void StartLevelNext()
+
+        private void StartFirstLevel()
+        {
+            _currentLevel = _startLevel - 2;
+            StartNextLevel();
+        }
+
+        private void StartNextLevel()
         {
             _currentLevel++;
 
@@ -66,6 +78,9 @@ namespace match3.core
 
             _boardContentFitter.UpdateLayout();
             _boardOffsetView.AnimateTransitionDown();
+
+            if (CheckForGameOver())
+                GameOver();
         }
 
         // ========================== Tile Click ============================
@@ -130,9 +145,12 @@ namespace match3.core
                 _boardOffsetView.AnimateTransitionUp(onComplete: () =>
                 {
                     _boardView.DestroyBoard();
-                    StartLevelNext();
+                    StartNextLevel();
                 });
             }
+
+            if (CheckForGameOver())
+                GameOver();
         }
 
 
@@ -265,6 +283,29 @@ namespace match3.core
             sequence.Append(_boardView.CreateTile(boardSequence.addedTiles));
 
             return sequence;
+        }
+
+
+        // ========================== Game Over ============================
+
+        private bool CheckForGameOver()
+        {
+            return _gameController.GetMatchTipsBruteForce().Count == 0;
+        }
+
+        private void GameOver()
+        {
+            _gameoverPanel.SetActive(true);
+        }
+
+        private void OnReplayClick()
+        {
+            _gameoverPanel.SetActive(false);
+            _boardOffsetView.AnimateTransitionUp(onComplete: () =>
+            {
+                _boardView.DestroyBoard();
+                StartFirstLevel();
+            });
         }
     }
 }

@@ -129,7 +129,7 @@ namespace match3.board
         {
             if (x < 0 || y < 0) return;
 
-            _tiles[y][x].SetSelected(selected);
+            _tiles[y][x].SetSelectedTip(selected);
         }
 
         // ========================== Swap ============================
@@ -161,7 +161,8 @@ namespace match3.board
 
                 seq.Join(tile.transform.DOScale(0f, 0.2f)).onComplete += () =>
                 {
-                    Destroy(tile.gameObject);
+                    tile.PlayDestroyParticles(true);
+                    //Destroy(tile.gameObject);
                 };
             }
 

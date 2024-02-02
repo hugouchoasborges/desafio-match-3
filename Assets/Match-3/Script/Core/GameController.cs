@@ -106,7 +106,7 @@ namespace match3.core
 
                         if (newBoard.IsMatch(x, y))
                         {
-                            matchedTipPositions.Add(new Vector2Int(x, y));
+                            matchedTipPositions.Add(new Vector2Int(neighbor.x, neighbor.y));
                         }
                     }
                 }

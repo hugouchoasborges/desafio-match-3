@@ -8,6 +8,8 @@ namespace match3.tile
     {
         [Header("Components")]
         [SerializeField] private Image _selectionIcon;
+        [SerializeField] private Image _tipSelectionIcon;
+        [SerializeField] private ParticleSystem _destroyParticles;
 
         public void SetParent(Transform parentTransform, bool worldPositionStays = false)
         {
@@ -26,7 +28,7 @@ namespace match3.tile
 
         public void SetSelectedTip(bool selected)
         {
-            _selectionIcon.enabled = selected;
+            _tipSelectionIcon.enabled = selected;
         }
 
         /// <summary>
@@ -40,6 +42,16 @@ namespace match3.tile
         {
             transform.DOKill();
             return transform.DOMove(to, duration);
+        }
+
+        // ========================== Particles ============================
+
+        [ContextMenu("Play Destroy Particles")]
+        public void PlayDestroyParticles(bool destroyGameobject)
+        {
+            _destroyParticles?.Play();
+            if (destroyGameobject)
+                DOVirtual.DelayedCall(1f, () => { Destroy(this.gameObject); });
         }
     }
 }
